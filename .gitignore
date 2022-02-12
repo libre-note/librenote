@@ -1,0 +1,27 @@
+# IDE files
+.vscode
+.idea
+
+# Mac OS X files
+.DS_Store
+
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Output of the go coverage tool
+*.out
+coverage.txt
+
+# Dependencies
+vendor
+
+# Misc
+bin/
+docs/swagger.json
+docs/swagger.yaml
+docs/docs.go
+config.yml

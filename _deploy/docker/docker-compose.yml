@@ -1,0 +1,13 @@
+version: "3.5"
+
+services:
+  librenote:
+    image: hrshadhin/librenote
+    container_name: librenote_core
+    restart: unless-stopped
+    volumes:
+      - config.yml:/app/config.yml
+    ports:
+      - 8000:8000
+    environment:
+      - TZ=Asia/Dhaka
