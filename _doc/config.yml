@@ -1,4 +1,5 @@
 app:
+  host: localhost
   port: 8000
   read_timeout: 30
   write_timeout: 30
@@ -6,19 +7,21 @@ app:
   request_body_limit: "5M"
   max_page_size: 50
   default_page_size: 20
+  data_path: .
 
 jwt:
   secret_key: "super_secret_key"
-  expire_in_seconds: 86400 # 1 day
+  expire_time: 10h
 
 database:
+  type: postgres
   host: localhost
   port: 5432
   name: librenote
   username: dev
   password: dev
   ssl_mode: disable
-  debug: true
   max_open_conn: 3
   max_idle_conn: 1
   max_life_time: 10s
+  debug: true

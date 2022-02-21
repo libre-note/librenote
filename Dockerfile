@@ -1,7 +1,9 @@
 ARG GO_VERSION=1.17
-ARG CURL_VERSION=7.81.0
 
 FROM golang:${GO_VERSION}-alpine AS builder
+
+ARG BUILD_VERSION=0.0.1
+ARG BUILD_TIME=00000000-000000
 
 # run the process as an unprivileged user.
 RUN mkdir /user && \
@@ -22,7 +24,7 @@ RUN go mod download
 COPY . .
 
 # Build the Go app
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o librenote-core .
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-s -w -X librenote/app.Version=$BUILD_VERSION -X librenote/app.BuildTime=$BUILD_TIME" -o librenote .
 
 
 # Minimal image for running the application
@@ -41,9 +43,9 @@ COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
 # Import the init binary
 COPY --from=builder /sbin/tini /sbin/tini
 # Import curl from curl repository image
-COPY --from=curlimages/curl:${CURL_VERSION} /bin/curl /bin/curl
+COPY --from="curlimages/curl:7.81.0" /usr/bin/curl /usr/bin/curl
 # Import the compiled executable from the first stage.
-COPY --from=builder /build/librenote-core /app/librenote-core
+COPY --from=builder /build/librenote /app/librenote
 
 # Open port
 EXPOSE 8000
@@ -52,8 +54,8 @@ EXPOSE 8000
 USER nobody:nobody
 WORKDIR /app
 
-HEALTHCHECK --interval=1m --timeout=2s --retries=3 --start-period=2s CMD ["curl", "--fail", "http://localhost:8000/health"]
+HEALTHCHECK --interval=5m --timeout=2s --retries=3 --start-period=2s CMD ["curl", "--fail", "http://localhost:8000/h34l7h"]
 
 # Run the compiled binary.
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["/app/librenote-core","--config","/app/config.yml"]
+ENTRYPOINT ["/app/librenote","--config","/app/config.yml", "serve"]
