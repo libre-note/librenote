@@ -1,30 +1,11 @@
-CREATE TYPE "note_type" AS ENUM (
-  'note',
-  'list'
-);
-
-CREATE TYPE "color" AS ENUM (
-  'red',
-  'orange',
-  'yellow',
-  'green',
-  'teal',
-  'blue',
-  'dark blue',
-  'purple',
-  'pink',
-  'brown',
-  'gray'
-);
-
 CREATE TABLE "users" (
   "id" serial PRIMARY KEY,
   "full_name" varchar(100) NOT NULL,
-  "email" varchar(255) NOT NULL,
+  "email" varchar(255) UNIQUE NOT NULL,
   "hash" varchar(255) NOT NULL,
   "salt" varchar(255) NOT NULL,
-  "is_active" boolean NOT NULL DEFAULT false,
-  "is_trashed" boolean NOT NULL DEFAULT false,
+  "is_active" smallint NOT NULL DEFAULT 0,
+  "is_trashed" smallint NOT NULL DEFAULT 0,
   "created_at" timestamptz NOT NULL DEFAULT (now()),
   "updated_at" timestamptz NOT NULL
 );
@@ -33,7 +14,7 @@ CREATE TABLE "labels" (
   "id" serial PRIMARY KEY,
   "name" varchar(50) NOT NULL,
   "user_id" int NOT NULL,
-  "is_trashed" boolean NOT NULL DEFAULT false,
+  "is_trashed" smallint NOT NULL DEFAULT 0,
   "created_at" timestamptz NOT NULL DEFAULT (now()),
   "updated_at" timestamptz NOT NULL
 );
@@ -42,11 +23,11 @@ CREATE TABLE "notes" (
   "id" serial PRIMARY KEY,
   "user_id" int NOT NULL,
   "title" varchar(255),
-  "color" color,
-  "type" note_type,
-  "is_pinned" boolean NOT NULL DEFAULT false,
-  "is_archived" boolean NOT NULL DEFAULT false,
-  "is_trashed" boolean NOT NULL DEFAULT false,
+  "color" varchar(10),
+  "type" varchar(4) NOT NULL DEFAULT 'note',
+  "is_pinned" smallint NOT NULL DEFAULT 0,
+  "is_archived" smallint NOT NULL DEFAULT 0,
+  "is_trashed" smallint NOT NULL DEFAULT 0,
   "created_at" timestamptz NOT NULL DEFAULT (now()),
   "updated_at" timestamptz NOT NULL
 );
@@ -55,7 +36,7 @@ CREATE TABLE "notes_items" (
   "id" serial PRIMARY KEY,
   "note_id" int NOT NULL,
   "text" varchar(1000) NOT NULL,
-  "is_checked" boolean NOT NULL DEFAULT false,
+  "is_checked" smallint NOT NULL DEFAULT 0,
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 
