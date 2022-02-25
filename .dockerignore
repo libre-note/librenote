@@ -19,3 +19,4 @@ bin/
 vendor/
 _deploy/
 _doc/
+data

@@ -3,8 +3,6 @@ package response
 import (
 	"errors"
 	"net/http"
-
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -39,7 +37,6 @@ func getStatusCode(err error) int {
 // RespondError takes an `error` and a `customErr message` args
 // to log the error to system and return to client
 func RespondError(err error, customErr ...error) (int, Response) {
-	logrus.Errorln(err, customErr)
 	if len(customErr) > 0 {
 		return getStatusCode(err), Response{Success: false, Message: customErr[0].Error()}
 	}
@@ -61,7 +58,7 @@ func (e wrapErr) Unwrap() error {
 	return e.Err // Returns inner error
 }
 
-func WrapError(err error, statusCode int, errCode string) error {
+func WrapError(err error, statusCode int) error {
 	return wrapErr{
 		Err:        err,
 		StatusCode: statusCode,

@@ -7,7 +7,7 @@ app:
   request_body_limit: "5M"
   max_page_size: 50
   default_page_size: 20
-  data_path: .
+  data_path: ./data # for sqlite | value must be /persist for docker
 
 jwt:
   secret_key: "super_secret_key"

@@ -31,11 +31,11 @@ func (sh *SystemHandler) Root(c echo.Context) error {
 
 // Health will let you know the heart beats
 func (sh *SystemHandler) Health(c echo.Context) error {
-	resp, err := sh.Usecase.GetHealth()
+	err := sh.Usecase.GetHealth()
 	if err != nil {
 		return c.JSON(response.RespondError(err))
 	}
-	return c.JSON(http.StatusOK, resp)
+	return c.JSON(http.StatusOK, &response.Response{Success: true, Message: "I'm healthy :)"})
 }
 
 // ServerTime will let you know the server time

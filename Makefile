@@ -9,7 +9,6 @@ BIN_OUT_DIR=bin
 MIGRATION_PATH_PG="infrastructure/db/migrations/pgsql"
 MIGRATION_PATH_SQLITE="infrastructure/db/migrations/sqlite"
 
-
 export PATH=$(shell go env GOPATH)/bin:$(shell echo $$PATH)
 
 .PHONY: all

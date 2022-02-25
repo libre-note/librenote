@@ -17,7 +17,7 @@ var dbc = &dbClient{}
 func Connect() {
 	dbType := config.Get().Database.Type
 	switch dbType {
-	case "postgresql":
+	case "postgres":
 		if err := connectPG(); err != nil {
 			logrus.Errorln(err)
 			os.Exit(1)

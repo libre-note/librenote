@@ -25,4 +25,4 @@ docs/swagger.json
 docs/swagger.yaml
 docs/docs.go
 config.yml
-librenote.db
+data

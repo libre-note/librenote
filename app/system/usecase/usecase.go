@@ -1,9 +1,13 @@
 package usecase
 
-import "librenote/app/system/repository"
+import (
+	"errors"
+	"librenote/app/response"
+	"librenote/app/system/repository"
+)
 
 type SystemUsecase interface {
-	GetHealth() (*HealthResp, error)
+	GetHealth() error
 	GetTime() *TimeResp
 }
 
@@ -17,17 +21,18 @@ func NewSystemUsecase(repo repository.SystemRepository) SystemUsecase {
 	}
 }
 
-func (u *systemUsecase) GetHealth() (*HealthResp, error) {
-	resp := HealthResp{}
-
+func (u *systemUsecase) GetHealth() error {
 	// check db
 	dbOnline, err := u.repo.DBCheck()
-	resp.DBOnline = dbOnline
 	if err != nil {
-		return &resp, err
+		return err
 	}
 
-	return &resp, nil
+	if !dbOnline {
+		return response.WrapError(errors.New("DB is offline"), 503)
+	}
+
+	return nil
 }
 
 func (u *systemUsecase) GetTime() *TimeResp {
@@ -38,9 +43,4 @@ func (u *systemUsecase) GetTime() *TimeResp {
 
 type TimeResp struct {
 	CurrentTimeUnix int64 `json:"current_time_unix"`
-}
-
-type HealthResp struct {
-	DBOnline    bool `json:"db_online"`
-	CacheOnline bool `json:"cache_online"`
 }

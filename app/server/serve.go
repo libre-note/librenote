@@ -71,7 +71,7 @@ func setupApiServer() *echo.Echo {
 	var sysRepo systemRepo.SystemRepository
 
 	switch dbType {
-	case "postgresql":
+	case "postgres":
 		sysRepo = systemRepoPgsql.NewPgsqlSystemRepository(dbClient)
 	default:
 		sysRepo = systemRepoSqlite.NewSqliteSystemRepository(dbClient)
