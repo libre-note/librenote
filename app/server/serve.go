@@ -53,8 +53,13 @@ func Serve() {
 }
 
 func setupApiServer() *echo.Echo {
+	cfg := config.Get().App
+
 	e := echo.New()
 	e.HideBanner = true
+	e.Server.ReadTimeout = cfg.ReadTimeout * time.Second
+	e.Server.WriteTimeout = cfg.WriteTimeout * time.Second
+	e.Server.IdleTimeout = cfg.IdleTimeout * time.Second
 
 	// e.Validator = &validator.GenericValidator{}
 	// fetch infra and routes

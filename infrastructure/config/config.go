@@ -20,13 +20,14 @@ type AppConfig struct {
 	RequestBodyLimit string `mapstructure:"request_body_limit"`
 	DateFormat       string
 	TimestampFormat  string
-	Host             string `mapstructure:"host"`
-	Port             int    `mapstructure:"port"`
-	ReadTimeout      int    `mapstructure:"read_timeout"`
-	WriteTimeout     int    `mapstructure:"write_timeout"`
-	IdleTimeout      int    `mapstructure:"idle_timeout"`
-	MaxPageSize      int    `mapstructure:"max_page_size"`
-	DefaultPageSize  int    `mapstructure:"default_page_size"`
+	Host             string        `mapstructure:"host"`
+	Port             int           `mapstructure:"port"`
+	ReadTimeout      time.Duration `mapstructure:"read_timeout"`
+	WriteTimeout     time.Duration `mapstructure:"write_timeout"`
+	IdleTimeout      time.Duration `mapstructure:"idle_timeout"`
+	MaxPageSize      int           `mapstructure:"max_page_size"`
+	DefaultPageSize  int           `mapstructure:"default_page_size"`
+	RegistrationOpen bool          `mapstructure:"registration_open"`
 }
 
 // DatabaseConfig DB specific config
@@ -66,6 +67,7 @@ func Set(cf Config) {
 func Load(path string) error {
 	viper.SetConfigType("yaml")
 	viper.SetConfigFile(path)
+	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
 		return fmt.Errorf("failed to read config: %v", err)

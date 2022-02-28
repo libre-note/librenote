@@ -11,12 +11,12 @@ const EchoLogFormat = "time: ${time_rfc3339_nano} || ${method}: ${uri} || u_agen
 
 // Attach middlewares required for the application
 func Attach(e *echo.Echo) error {
-	cnfg := config.Get().App
+	cfg := config.Get().App
 
 	// echo middlewares
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{Format: EchoLogFormat}))
 	e.Use(middleware.Recover())
-	e.Use(middleware.BodyLimit(cnfg.RequestBodyLimit))
+	e.Use(middleware.BodyLimit(cfg.RequestBodyLimit))
 	e.Pre(middleware.RemoveTrailingSlash())
 
 	return nil
