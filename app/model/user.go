@@ -9,9 +9,11 @@ type User struct {
 	// password hash
 	Hash string `json:"hash"`
 	// password salt
-	Salt      string    `json:"salt"`
-	IsActive  bool      `json:"is_active"`
-	IsTrashed bool      `json:"is_trashed"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	Salt            string    `json:"salt"`
+	IsActive        int8      `json:"is_active"`
+	IsTrashed       int8      `json:"is_trashed"`
+	ListViewEnabled int8      `json:"list_view_enabled"`
+	DarkModeEnabled int8      `json:"dark_mode_enabled"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
 }

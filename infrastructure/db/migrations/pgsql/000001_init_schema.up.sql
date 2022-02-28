@@ -6,6 +6,8 @@ CREATE TABLE "users" (
   "salt" varchar(255) NOT NULL,
   "is_active" smallint NOT NULL DEFAULT 0,
   "is_trashed" smallint NOT NULL DEFAULT 0,
+  "list_view_enabled" smallint NOT NULL DEFAULT 0,
+  "dark_mode_enabled" smallint NOT NULL DEFAULT 0,
   "created_at" timestamptz NOT NULL DEFAULT (now()),
   "updated_at" timestamptz NOT NULL
 );

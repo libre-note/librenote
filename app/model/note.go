@@ -30,9 +30,9 @@ type Note struct {
 	Title      sql.NullString `json:"title"`
 	Color      string         `json:"color"`
 	Type       string         `json:"type"`
-	IsPinned   bool           `json:"is_pinned"`
-	IsArchived bool           `json:"is_archived"`
-	IsTrashed  bool           `json:"is_trashed"`
+	IsPinned   int8           `json:"is_pinned"`
+	IsArchived int8           `json:"is_archived"`
+	IsTrashed  int8           `json:"is_trashed"`
 	CreatedAt  time.Time      `json:"created_at"`
 	UpdatedAt  time.Time      `json:"updated_at"`
 }
@@ -41,7 +41,7 @@ type NotesItem struct {
 	ID        int32     `json:"id"`
 	NoteID    int32     `json:"note_id"`
 	Text      *string   `json:"text"`
-	IsChecked bool      `json:"is_checked"`
+	IsChecked int8      `json:"is_checked"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
