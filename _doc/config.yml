@@ -1,17 +1,18 @@
 app:
-  host: localhost
+  host:
   port: 8000
-  read_timeout: 30
-  write_timeout: 30
-  idle_timeout: 30
+  read_timeout: 2
+  write_timeout: 5
+  idle_timeout: 3
   request_body_limit: "5M"
   max_page_size: 50
   default_page_size: 20
   data_path: ./data # for sqlite | value must be /persist for docker
+  registration_open: true
 
 jwt:
   secret_key: "super_secret_key"
-  expire_time: 10h
+  expire_time: 3600s
 
 database:
   type: postgres

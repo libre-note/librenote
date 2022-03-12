@@ -3,7 +3,6 @@ CREATE TABLE "users" (
   "full_name" varchar(100) NOT NULL,
   "email" varchar(255) UNIQUE NOT NULL,
   "hash" varchar(255) NOT NULL,
-  "salt" varchar(255) NOT NULL,
   "is_active" smallint NOT NULL DEFAULT 0,
   "is_trashed" smallint NOT NULL DEFAULT 0,
   "list_view_enabled" smallint NOT NULL DEFAULT 0,

@@ -6,10 +6,8 @@ type User struct {
 	ID       int32  `json:"id"`
 	FullName string `json:"full_name"`
 	Email    string `json:"email"`
-	// password hash
-	Hash string `json:"hash"`
-	// password salt
-	Salt            string    `json:"salt"`
+	// password salted hash
+	Hash            string    `json:"hash"`
 	IsActive        int8      `json:"is_active"`
 	IsTrashed       int8      `json:"is_trashed"`
 	ListViewEnabled int8      `json:"list_view_enabled"`

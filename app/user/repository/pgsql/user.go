@@ -19,9 +19,9 @@ func NewPgsqlUserRepository(db *sql.DB) repository.UserRepository {
 }
 
 const createUser = `INSERT INTO users (
-  full_name, email, hash, salt, is_active, updated_at
+  full_name, email, hash, is_active, updated_at
 ) VALUES (
-  $1, $2, $3, $4, $5,  $6
+  $1, $2, $3, $4, $5
 )
 `
 
@@ -35,7 +35,6 @@ func (r *userRepository) CreateUser(ctx context.Context, user *model.User) error
 		user.FullName,
 		user.Email,
 		user.Hash,
-		user.Salt,
 		user.IsActive,
 		user.UpdatedAt,
 	)
@@ -52,7 +51,7 @@ func (r *userRepository) CreateUser(ctx context.Context, user *model.User) error
 	return nil
 }
 
-const getUser = `SELECT id, full_name, email, hash, salt, is_active, is_trashed, list_view_enabled, dark_mode_enabled,
+const getUser = `SELECT id, full_name, email, hash, is_active, is_trashed, list_view_enabled, dark_mode_enabled,
 created_at, updated_at FROM users WHERE id = $1 LIMIT 1
 `
 
@@ -64,7 +63,6 @@ func (r *userRepository) GetUser(ctx context.Context, id int32) (model.User, err
 		&i.FullName,
 		&i.Email,
 		&i.Hash,
-		&i.Salt,
 		&i.IsActive,
 		&i.IsTrashed,
 		&i.ListViewEnabled,
@@ -75,7 +73,7 @@ func (r *userRepository) GetUser(ctx context.Context, id int32) (model.User, err
 	return i, err
 }
 
-const getUserByEmail = `SELECT id, full_name, email, hash, salt, is_active, is_trashed, list_view_enabled, dark_mode_enabled,
+const getUserByEmail = `SELECT id, full_name, email, hash, is_active, is_trashed, list_view_enabled, dark_mode_enabled,
 created_at, updated_at FROM users WHERE email = $1 LIMIT 1
 `
 
@@ -87,7 +85,6 @@ func (r *userRepository) GetUserByEmail(ctx context.Context, email string) (mode
 		&i.FullName,
 		&i.Email,
 		&i.Hash,
-		&i.Salt,
 		&i.IsActive,
 		&i.IsTrashed,
 		&i.ListViewEnabled,
@@ -100,12 +97,11 @@ func (r *userRepository) GetUserByEmail(ctx context.Context, email string) (mode
 
 const updateUser = `UPDATE users
 SET hash = $2,
-salt = $3,
-is_active = $4,
-is_trashed = $5,
-list_view_enabled = $6,
-dark_mode_enabled = $7,
-updated_at = $8
+is_active = $3,
+is_trashed = $4,
+list_view_enabled = $5,
+dark_mode_enabled = $6,
+updated_at = $7
 WHERE id = $1
 `
 
@@ -117,7 +113,6 @@ func (r *userRepository) UpdateUser(ctx context.Context, user *model.User) error
 	res, err := stmt.ExecContext(ctx,
 		user.ID,
 		user.Hash,
-		user.Salt,
 		user.IsActive,
 		user.IsTrashed,
 		user.ListViewEnabled,
