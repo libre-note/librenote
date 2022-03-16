@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"errors"
-	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 	"librenote/app/model"
 	"time"
@@ -56,16 +55,19 @@ func (u *userUsecase) Login(c context.Context, email, password string) (user mod
 
 	user, err = u.repo.GetUserByEmail(ctx, email)
 	if err != nil {
-		logrus.Error(err)
-		return user, errors.New("user/password is incorrect")
+		return user, errors.New("email/password is incorrect")
 
 	}
 
 	// check password
 	err = bcrypt.CompareHashAndPassword([]byte(user.Hash), []byte(password))
 	if err != nil {
-		logrus.Error(err)
-		return user, errors.New("user/password is incorrect")
+		return user, errors.New("email/password is incorrect")
+	}
+
+	// check user state
+	if user.IsActive == 0 || user.IsTrashed == 1 {
+		return user, errors.New("user not exist or inactive")
 	}
 
 	return user, nil
