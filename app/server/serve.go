@@ -12,8 +12,6 @@ import (
 	"librenote/app"
 	systemDelivery "librenote/app/system/delivery/http"
 	systemRepo "librenote/app/system/repository"
-	systemRepoPgsql "librenote/app/system/repository/pgsql"
-	systemRepoSqlite "librenote/app/system/repository/sqlite"
 	systemUseCase "librenote/app/system/usecase"
 	"librenote/infrastructure/config"
 	"librenote/infrastructure/db"
@@ -70,17 +68,17 @@ func setupApiServer() *echo.Echo {
 
 	db.Connect()
 	dbClient := db.GetClient()
-	dbType := config.Get().Database.Type
+	//dbType := config.Get().Database.Type
 
 	// repository
-	var sysRepo systemRepo.SystemRepository
+	sysRepo := systemRepo.NewSystemRepository(dbClient)
 
-	switch dbType {
-	case "postgres":
-		sysRepo = systemRepoPgsql.NewPgsqlSystemRepository(dbClient)
-	default:
-		sysRepo = systemRepoSqlite.NewSqliteSystemRepository(dbClient)
-	}
+	//switch dbType {
+	//case "postgres":
+	//	sysRepo = systemRepoPgsql.NewPgsqlSystemRepository(dbClient)
+	//default:
+	//	sysRepo = systemRepoSqlite.NewSqliteSystemRepository(dbClient)
+	//}
 
 	// use cases
 	sysUseCase := systemUseCase.NewSystemUsecase(sysRepo)

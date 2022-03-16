@@ -1,16 +1,20 @@
-package sqlite
+package repository
 
 import (
 	"database/sql"
-	"librenote/app/system/repository"
 	"time"
 )
+
+type SystemRepository interface {
+	DBCheck() (bool, error)
+	CurrentTime() int64
+}
 
 type systemRepository struct {
 	db *sql.DB
 }
 
-func NewSqliteSystemRepository(db *sql.DB) repository.SystemRepository {
+func NewSystemRepository(db *sql.DB) SystemRepository {
 	return &systemRepository{
 		db: db,
 	}

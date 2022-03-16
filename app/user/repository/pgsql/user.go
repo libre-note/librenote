@@ -5,14 +5,13 @@ import (
 	"database/sql"
 	"errors"
 	"librenote/app/model"
-	"librenote/app/user/repository"
 )
 
 type userRepository struct {
 	db *sql.DB
 }
 
-func NewPgsqlUserRepository(db *sql.DB) repository.UserRepository {
+func NewPgsqlUserRepository(db *sql.DB) model.UserRepository {
 	return &userRepository{
 		db: db,
 	}

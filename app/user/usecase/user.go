@@ -6,7 +6,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 	"librenote/app/model"
-	"librenote/app/user/repository"
 	"time"
 )
 
@@ -18,11 +17,11 @@ type UserUsecase interface {
 }
 
 type userUsecase struct {
-	repo           repository.UserRepository
+	repo           model.UserRepository
 	contextTimeout time.Duration
 }
 
-func NewUserUsecase(repo repository.UserRepository, timeout time.Duration) UserUsecase {
+func NewUserUsecase(repo model.UserRepository, timeout time.Duration) UserUsecase {
 	return &userUsecase{
 		repo:           repo,
 		contextTimeout: timeout,
