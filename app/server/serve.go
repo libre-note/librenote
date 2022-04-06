@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"librenote/app/model"
 	"log"
 	"os"
 	"os/signal"
@@ -13,6 +14,9 @@ import (
 	systemDelivery "librenote/app/system/delivery/http"
 	systemRepo "librenote/app/system/repository"
 	systemUseCase "librenote/app/system/usecase"
+	userDelivery "librenote/app/user/delivery/http"
+	userPgsqlRepo "librenote/app/user/repository/pgsql"
+	userUseCase "librenote/app/user/usecase"
 	"librenote/infrastructure/config"
 	"librenote/infrastructure/db"
 	"librenote/infrastructure/middlewares"
@@ -58,6 +62,7 @@ func setupApiServer() *echo.Echo {
 	e.Server.ReadTimeout = cfg.ReadTimeout * time.Second
 	e.Server.WriteTimeout = cfg.WriteTimeout * time.Second
 	e.Server.IdleTimeout = cfg.IdleTimeout * time.Second
+	contextTimeout := cfg.ContextTimeout * time.Second
 
 	// e.Validator = &validator.GenericValidator{}
 	// fetch infra and routes
@@ -68,23 +73,26 @@ func setupApiServer() *echo.Echo {
 
 	db.Connect()
 	dbClient := db.GetClient()
-	//dbType := config.Get().Database.Type
+	dbType := config.Get().Database.Type
 
 	// repository
 	sysRepo := systemRepo.NewSystemRepository(dbClient)
+	var uRepo model.UserRepository
 
-	//switch dbType {
-	//case "postgres":
-	//	sysRepo = systemRepoPgsql.NewPgsqlSystemRepository(dbClient)
-	//default:
-	//	sysRepo = systemRepoSqlite.NewSqliteSystemRepository(dbClient)
-	//}
+	switch dbType {
+	case "postgres":
+		uRepo = userPgsqlRepo.NewPgsqlUserRepository(dbClient)
+	default:
+		uRepo = userPgsqlRepo.NewPgsqlUserRepository(dbClient)
+	}
 
 	// use cases
 	sysUseCase := systemUseCase.NewSystemUsecase(sysRepo)
+	uUseCase := userUseCase.NewUserUsecase(uRepo, contextTimeout)
 
 	// delivery
 	systemDelivery.NewSystemHandler(e, sysUseCase)
+	userDelivery.NewUserHandler(e, uUseCase)
 
 	return e
 }

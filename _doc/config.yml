@@ -4,6 +4,7 @@ app:
   read_timeout: 2
   write_timeout: 5
   idle_timeout: 3
+  context_timeout: 2
   request_body_limit: "5M"
   max_page_size: 50
   default_page_size: 20

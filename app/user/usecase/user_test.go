@@ -178,7 +178,7 @@ func TestUpdate(t *testing.T) {
 
 	t.Run("change-password", func(t *testing.T) {
 		existingUser := mockUser
-		pass := usecase.Password{
+		pass := model.Password{
 			OldPassword: "super_password",
 			NewPassword: "super_new_pass",
 			IsChanged:   true,
@@ -196,7 +196,7 @@ func TestUpdate(t *testing.T) {
 
 	t.Run("wrong-password", func(t *testing.T) {
 		existingUser := mockUser
-		pass := usecase.Password{
+		pass := model.Password{
 			OldPassword: "superpassword",
 			NewPassword: "super_new_pass",
 			IsChanged:   true,
@@ -214,7 +214,7 @@ func TestUpdate(t *testing.T) {
 	t.Run("delete", func(t *testing.T) {
 		existingUser := mockUser
 		existingUser.IsTrashed = 1
-		pass := usecase.Password{IsChanged: false}
+		pass := model.Password{IsChanged: false}
 
 		mockUserRepo.On("UpdateUser", mock.Anything, mock.AnythingOfType("*model.User")).
 			Return(nil).Once()

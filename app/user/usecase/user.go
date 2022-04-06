@@ -8,19 +8,12 @@ import (
 	"time"
 )
 
-type UserUsecase interface {
-	Registration(c context.Context, m *model.User) (err error)
-	Login(c context.Context, email, password string) (user model.User, err error)
-	GetByID(c context.Context, id int32) (user model.User, err error)
-	Update(c context.Context, m *model.User, p Password) error
-}
-
 type userUsecase struct {
 	repo           model.UserRepository
 	contextTimeout time.Duration
 }
 
-func NewUserUsecase(repo model.UserRepository, timeout time.Duration) UserUsecase {
+func NewUserUsecase(repo model.UserRepository, timeout time.Duration) model.UserUsecase {
 	return &userUsecase{
 		repo:           repo,
 		contextTimeout: timeout,
@@ -86,13 +79,7 @@ func (u *userUsecase) GetByID(c context.Context, id int32) (user model.User, err
 	return
 }
 
-type Password struct {
-	OldPassword string
-	NewPassword string
-	IsChanged   bool
-}
-
-func (u *userUsecase) Update(c context.Context, m *model.User, p Password) error {
+func (u *userUsecase) Update(c context.Context, m *model.User, p model.Password) error {
 	ctx, cancel := context.WithTimeout(c, u.contextTimeout)
 	defer cancel()
 

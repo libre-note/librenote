@@ -1,6 +1,12 @@
 package http
 
-import "github.com/golang-jwt/jwt"
+import (
+	"github.com/golang-jwt/jwt"
+	"github.com/labstack/echo/v4"
+	"librenote/app/model"
+	"librenote/app/response"
+	"time"
+)
 
 type jwtCustomClaims struct {
 	ID int32 `json:"id"`
@@ -22,3 +28,46 @@ type jwtCustomClaims struct {
 //return "", err
 //}
 //return token, err
+
+// UserHandler represent the http handler for user
+type UserHandler struct {
+	UUseCase model.UserUsecase
+}
+
+func NewUserHandler(e *echo.Echo, us model.UserUsecase) {
+	handler := &UserHandler{
+		UUseCase: us,
+	}
+
+	v1 := e.Group("/api/v1")
+	v1.POST("/registration", handler.Registration)
+}
+
+func (u *UserHandler) Registration(c echo.Context) (err error) {
+	var regReq registrationReq
+	err = c.Bind(&regReq)
+	if err != nil {
+		return c.JSON(response.RespondError(response.ErrUnprocessableEntity, err))
+	}
+
+	var ok bool
+	if ok, err = isRegistrationReqValid(&regReq); !ok {
+		return c.JSON(response.RespondError(response.ErrBadRequest, err))
+	}
+
+	user := model.User{
+		FullName:  regReq.FullName,
+		Email:     regReq.Email,
+		Hash:      regReq.Password,
+		IsActive:  1,
+		UpdatedAt: time.Now().UTC(),
+	}
+	ctx := c.Request().Context()
+	err = u.UUseCase.Registration(ctx, &user)
+	if err != nil {
+		return c.JSON(response.RespondError(err))
+	}
+
+	return c.JSON(response.RespondSuccess("registration successful", nil))
+
+}

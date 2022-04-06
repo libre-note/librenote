@@ -26,3 +26,18 @@ type UserRepository interface {
 	GetUserByEmail(tx context.Context, email string) (User, error)
 	UpdateUser(tx context.Context, user *User) error
 }
+
+// Password struct
+type Password struct {
+	OldPassword string
+	NewPassword string
+	IsChanged   bool
+}
+
+// UserUsecase represent the user's usecase contract
+type UserUsecase interface {
+	Registration(c context.Context, m *User) (err error)
+	Login(c context.Context, email, password string) (user User, err error)
+	GetByID(c context.Context, id int32) (user User, err error)
+	Update(c context.Context, m *User, p Password) error
+}

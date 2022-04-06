@@ -25,6 +25,7 @@ type AppConfig struct {
 	ReadTimeout      time.Duration `mapstructure:"read_timeout"`
 	WriteTimeout     time.Duration `mapstructure:"write_timeout"`
 	IdleTimeout      time.Duration `mapstructure:"idle_timeout"`
+	ContextTimeout   time.Duration `mapstructure:"context_timeout"`
 	MaxPageSize      int           `mapstructure:"max_page_size"`
 	DefaultPageSize  int           `mapstructure:"default_page_size"`
 	RegistrationOpen bool          `mapstructure:"registration_open"`

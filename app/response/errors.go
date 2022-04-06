@@ -10,6 +10,7 @@ var (
 	ErrInvalidPage         = errors.New("invalid page request")
 	ErrConflict            = errors.New("data conflict or already exist")
 	ErrBadRequest          = errors.New("bad request, check param or body")
+	ErrUnprocessableEntity = errors.New("can't process request, check param or body")
 	ErrInternalServerError = errors.New("internal server error")
 )
 
@@ -23,6 +24,8 @@ func getStatusCode(err error) int {
 		return http.StatusConflict
 	case ErrBadRequest:
 		return http.StatusBadRequest
+	case ErrUnprocessableEntity:
+		return http.StatusUnprocessableEntity
 	case ErrInternalServerError:
 		return http.StatusInternalServerError
 	default:

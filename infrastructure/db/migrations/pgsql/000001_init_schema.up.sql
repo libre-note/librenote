@@ -59,5 +59,3 @@ ALTER TABLE "notes_labels" ADD FOREIGN KEY ("label_id") REFERENCES "labels" ("id
 
 
 COMMENT ON COLUMN "users"."hash" IS 'password hash';
-
-COMMENT ON COLUMN "users"."salt" IS 'password salt';
