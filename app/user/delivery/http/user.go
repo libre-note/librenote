@@ -43,16 +43,19 @@ func NewUserHandler(e *echo.Echo, us model.UserUsecase) {
 	v1.POST("/registration", handler.Registration)
 }
 
-func (u *UserHandler) Registration(c echo.Context) (err error) {
+func (u *UserHandler) Registration(c echo.Context) error {
 	var regReq registrationReq
-	err = c.Bind(&regReq)
+	err := c.Bind(&regReq)
 	if err != nil {
 		return c.JSON(response.RespondError(response.ErrUnprocessableEntity, err))
 	}
 
-	var ok bool
-	if ok, err = isRegistrationReqValid(&regReq); !ok {
-		return c.JSON(response.RespondError(response.ErrBadRequest, err))
+	if ok, err := isRegistrationReqValid(&regReq); !ok {
+		valErr, errors := formatValidationError(err)
+		if valErr != nil {
+			return c.JSON(response.RespondError(response.ErrBadRequest, valErr))
+		}
+		return c.JSON(response.RespondValidationError(response.ErrBadRequest, errors))
 	}
 
 	user := model.User{

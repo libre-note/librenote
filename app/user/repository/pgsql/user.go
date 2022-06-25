@@ -30,7 +30,7 @@ func (r *userRepository) CreateUser(ctx context.Context, user *model.User) error
 		return err
 	}
 
-	res, err := stmt.ExecContext(ctx,
+	_, err = stmt.ExecContext(ctx,
 		user.FullName,
 		user.Email,
 		user.Hash,
@@ -40,13 +40,6 @@ func (r *userRepository) CreateUser(ctx context.Context, user *model.User) error
 	if err != nil {
 		return err
 	}
-
-	lastID, err := res.LastInsertId()
-	if err != nil {
-		return err
-	}
-	user.ID = int32(lastID)
-
 	return nil
 }
 

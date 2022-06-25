@@ -46,6 +46,10 @@ func RespondError(err error, customErr ...error) (int, Response) {
 	return getStatusCode(err), Response{Success: false, Message: err.Error()}
 }
 
+func RespondValidationError(err error, errors map[string]interface{}) (int, Response) {
+	return getStatusCode(err), Response{Success: false, Message: err.Error(), Errors: errors}
+}
+
 type wrapErr struct {
 	StatusCode int
 	Err        error

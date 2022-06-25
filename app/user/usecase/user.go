@@ -5,6 +5,7 @@ import (
 	"errors"
 	"golang.org/x/crypto/bcrypt"
 	"librenote/app/model"
+	"librenote/app/response"
 	"time"
 )
 
@@ -27,7 +28,7 @@ func (u *userUsecase) Registration(c context.Context, m *model.User) (err error)
 	// check user already exists
 	existedUser, _ := u.repo.GetUserByEmail(ctx, m.Email)
 	if existedUser != (model.User{}) {
-		return errors.New("user already exist")
+		return response.ErrConflict
 	}
 
 	// generate password salted hash
