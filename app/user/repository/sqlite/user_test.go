@@ -1,18 +1,17 @@
-package pgsql_test
+package sqlite_test
 
 import (
 	"context"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"librenote/app/model"
-	userRepo "librenote/app/user/repository/pgsql"
+	userRepo "librenote/app/user/repository/sqlite"
 	"testing"
 	"time"
 )
 
 func TestCreateUser(t *testing.T) {
 	nowTime := time.Now().UTC().Format("2006-01-02 15:04:05")
-
 	u := &model.User{
 		FullName:  "Mr. Test",
 		Email:     "mrtest@example.com",
@@ -32,7 +31,7 @@ func TestCreateUser(t *testing.T) {
 	prep := mock.ExpectPrepare(query)
 	prep.ExpectExec().WithArgs(u.FullName, u.Email, u.Hash, u.IsActive, u.CreatedAt, u.UpdatedAt).WillReturnResult(sqlmock.NewResult(1, 1))
 
-	ur := userRepo.NewPgsqlUserRepository(db)
+	ur := userRepo.NewSqliteUserRepository(db)
 	err = ur.CreateUser(context.TODO(), u)
 	assert.NoError(t, err)
 }
@@ -62,7 +61,7 @@ func TestGetUser(t *testing.T) {
 	query := "SELECT id, full_name, email, hash, is_active, is_trashed, list_view_enabled, dark_mode_enabled, created_at, updated_at FROM users WHERE id = \\$1 LIMIT 1"
 	mock.ExpectQuery(query).WillReturnRows(rows)
 
-	ur := userRepo.NewPgsqlUserRepository(db)
+	ur := userRepo.NewSqliteUserRepository(db)
 
 	num := int32(1)
 	user, err := ur.GetUser(context.TODO(), num)
@@ -89,7 +88,7 @@ func TestGetUserByEmail(t *testing.T) {
 	query := "SELECT id, full_name, email, hash, is_active, is_trashed, list_view_enabled, dark_mode_enabled, created_at, updated_at FROM users WHERE email = \\$1 LIMIT 1"
 	mock.ExpectQuery(query).WillReturnRows(rows)
 
-	ur := userRepo.NewPgsqlUserRepository(db)
+	ur := userRepo.NewSqliteUserRepository(db)
 
 	email := "mrtest@example.com"
 	user, err := ur.GetUserByEmail(context.TODO(), email)
@@ -122,7 +121,7 @@ func TestUpdateUser(t *testing.T) {
 	prep.ExpectExec().WithArgs(u.ID, u.Hash, u.IsActive, u.IsTrashed, u.ListViewEnabled, u.DarkModeEnabled, u.UpdatedAt).
 		WillReturnResult(sqlmock.NewResult(12, 1))
 
-	ur := userRepo.NewPgsqlUserRepository(db)
+	ur := userRepo.NewSqliteUserRepository(db)
 
 	err = ur.UpdateUser(context.TODO(), u)
 	assert.NoError(t, err)

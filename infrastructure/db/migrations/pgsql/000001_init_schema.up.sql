@@ -7,8 +7,8 @@ CREATE TABLE "users" (
   "is_trashed" smallint NOT NULL DEFAULT 0,
   "list_view_enabled" smallint NOT NULL DEFAULT 0,
   "dark_mode_enabled" smallint NOT NULL DEFAULT 0,
-  "created_at" timestamptz NOT NULL DEFAULT (now()),
-  "updated_at" timestamptz NOT NULL
+  "created_at" TIMESTAMP(0) NOT NULL,
+  "updated_at" TIMESTAMP(0) NOT NULL
 );
 
 CREATE TABLE "labels" (
@@ -16,8 +16,8 @@ CREATE TABLE "labels" (
   "name" varchar(50) NOT NULL,
   "user_id" int NOT NULL,
   "is_trashed" smallint NOT NULL DEFAULT 0,
-  "created_at" timestamptz NOT NULL DEFAULT (now()),
-  "updated_at" timestamptz NOT NULL
+  "created_at" TIMESTAMP(0) NOT NULL,
+  "updated_at" TIMESTAMP(0) NOT NULL
 );
 
 CREATE TABLE "notes" (
@@ -29,8 +29,8 @@ CREATE TABLE "notes" (
   "is_pinned" smallint NOT NULL DEFAULT 0,
   "is_archived" smallint NOT NULL DEFAULT 0,
   "is_trashed" smallint NOT NULL DEFAULT 0,
-  "created_at" timestamptz NOT NULL DEFAULT (now()),
-  "updated_at" timestamptz NOT NULL
+  "created_at" TIMESTAMP(0) NOT NULL,
+  "updated_at" TIMESTAMP(0) NOT NULL
 );
 
 CREATE TABLE "notes_items" (
@@ -38,7 +38,7 @@ CREATE TABLE "notes_items" (
   "note_id" int NOT NULL,
   "text" varchar(1000) NOT NULL,
   "is_checked" smallint NOT NULL DEFAULT 0,
-  "created_at" timestamptz NOT NULL DEFAULT (now())
+  "created_at" TIMESTAMP(0) NOT NULL,
 );
 
 CREATE TABLE "notes_labels" (

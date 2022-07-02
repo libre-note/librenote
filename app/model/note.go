@@ -2,7 +2,6 @@ package model
 
 import (
 	"database/sql"
-	"time"
 )
 
 //var Colors = map[string]string{
@@ -33,16 +32,16 @@ type Note struct {
 	IsPinned   int8           `json:"is_pinned"`
 	IsArchived int8           `json:"is_archived"`
 	IsTrashed  int8           `json:"is_trashed"`
-	CreatedAt  time.Time      `json:"created_at"`
-	UpdatedAt  time.Time      `json:"updated_at"`
+	CreatedAt  string         `json:"created_at"`
+	UpdatedAt  string         `json:"updated_at"`
 }
 
 type NotesItem struct {
-	ID        int32     `json:"id"`
-	NoteID    int32     `json:"note_id"`
-	Text      *string   `json:"text"`
-	IsChecked int8      `json:"is_checked"`
-	CreatedAt time.Time `json:"created_at"`
+	ID        int32   `json:"id"`
+	NoteID    int32   `json:"note_id"`
+	Text      *string `json:"text"`
+	IsChecked int8    `json:"is_checked"`
+	CreatedAt string  `json:"created_at"`
 }
 
 type NotesLabel struct {

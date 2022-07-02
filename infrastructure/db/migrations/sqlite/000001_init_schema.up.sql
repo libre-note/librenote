@@ -7,7 +7,7 @@ CREATE TABLE `users` (
   `is_trashed` INTEGER NOT NULL DEFAULT 0,
   `list_view_enabled` INTEGER NOT NULL DEFAULT 0,
   `dark_mode_enabled` INTEGER NOT NULL DEFAULT 0,
-  `created_at` TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+  `created_at` TEXT NOT NULL,
   `updated_at` TEXT NOT NULL,
   CONSTRAINT user_PK PRIMARY KEY(id),
   CONSTRAINT user_email_UNIQUE UNIQUE(email)
@@ -18,7 +18,7 @@ CREATE TABLE `labels` (
   `name` TEXT NOT NULL,
   `user_id` INTEGER NOT NULL,
   `is_trashed` INTEGER NOT NULL DEFAULT 0,
-  `created_at` TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+  `created_at` TEXT NOT NULL,
   `updated_at` TEXT NOT NULL,
    CONSTRAINT label_PK PRIMARY KEY(id),
    CONSTRAINT user_id_FK FOREIGN KEY(user_id) REFERENCES users(id)
@@ -33,7 +33,7 @@ CREATE TABLE `notes` (
   `is_pinned` INTEGER NOT NULL DEFAULT 0,
   `is_archived` INTEGER NOT NULL DEFAULT 0,
   `is_trashed` INTEGER NOT NULL DEFAULT 0,
-  `created_at` TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+  `created_at` TEXT NOT NULL,
   `updated_at` TEXT NOT NULL,
   CONSTRAINT note_PK PRIMARY KEY(id)
   CONSTRAINT user_id_FK FOREIGN KEY(user_id) REFERENCES users(id)
@@ -44,7 +44,7 @@ CREATE TABLE `notes_items` (
   `note_id` INTEGER NOT NULL,
   `text` TEXT NOT NULL,
   `is_checked` INTEGER NOT NULL DEFAULT 0,
-  `created_at` TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+  `created_at` TEXT NOT NULL,
    CONSTRAINT notes_item_PK PRIMARY KEY(id),
    CONSTRAINT note_id_FK FOREIGN KEY(note_id) REFERENCES notes(id)
 );

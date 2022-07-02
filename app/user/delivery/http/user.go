@@ -44,12 +44,14 @@ func (u *UserHandler) Registration(c echo.Context) error {
 		return c.JSON(response.RespondValidationError(response.ErrBadRequest, errors))
 	}
 
+	nowTime := time.Now().UTC().Format("2006-01-02 15:04:05")
 	user := model.User{
 		FullName:  regReq.FullName,
 		Email:     regReq.Email,
 		Hash:      regReq.Password,
 		IsActive:  1,
-		UpdatedAt: time.Now().UTC(),
+		CreatedAt: nowTime,
+		UpdatedAt: nowTime,
 	}
 	ctx := c.Request().Context()
 	err = u.UUseCase.Registration(ctx, &user)

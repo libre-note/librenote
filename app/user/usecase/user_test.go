@@ -15,13 +15,15 @@ import (
 
 func TestRegistration(t *testing.T) {
 	mockUserRepo := new(mocks.UserRepository)
+	nowTime := time.Now().UTC().Format("2006-01-02 15:04:05")
 
 	mockUser := model.User{
 		FullName:  "Mr. Test",
 		Email:     "mrtest@example.com",
 		Hash:      "super_password",
 		IsActive:  1,
-		UpdatedAt: time.Now().UTC(),
+		CreatedAt: nowTime,
+		UpdatedAt: nowTime,
 	}
 
 	t.Run("success", func(t *testing.T) {

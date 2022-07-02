@@ -1,4 +1,4 @@
-package pgsql
+package sqlite
 
 import (
 	"context"
@@ -11,7 +11,7 @@ type userRepository struct {
 	db *sql.DB
 }
 
-func NewPgsqlUserRepository(db *sql.DB) model.UserRepository {
+func NewSqliteUserRepository(db *sql.DB) model.UserRepository {
 	return &userRepository{
 		db: db,
 	}

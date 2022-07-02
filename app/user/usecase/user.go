@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
@@ -100,6 +101,9 @@ func (u *userUsecase) GetUserDetails(c context.Context, id int32) (details *mode
 
 	user, err := u.repo.GetUser(ctx, id)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, response.ErrNotFound
+		}
 		return
 	}
 
