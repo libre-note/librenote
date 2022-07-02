@@ -3,9 +3,13 @@ package usecase
 import (
 	"context"
 	"errors"
+	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 	"librenote/app/model"
 	"librenote/app/response"
+	"librenote/infrastructure/config"
+	"librenote/infrastructure/middlewares"
+	"net/http"
 	"time"
 )
 
@@ -43,39 +47,68 @@ func (u *userUsecase) Registration(c context.Context, m *model.User) (err error)
 	return
 }
 
-func (u *userUsecase) Login(c context.Context, email, password string) (user model.User, err error) {
+func (u *userUsecase) Login(c context.Context, email, password string) (token string, err error) {
 	ctx, cancel := context.WithTimeout(c, u.contextTimeout)
 	defer cancel()
 
-	user, err = u.repo.GetUserByEmail(ctx, email)
+	user, err := u.repo.GetUserByEmail(ctx, email)
 	if err != nil {
-		return user, errors.New("email/password is incorrect")
+		return "", response.WrapError(errors.New("email/password is incorrect"), http.StatusUnauthorized)
 
 	}
 
 	// check password
 	err = bcrypt.CompareHashAndPassword([]byte(user.Hash), []byte(password))
 	if err != nil {
-		return user, errors.New("email/password is incorrect")
+		return "", response.WrapError(errors.New("email/password is incorrect"), http.StatusUnauthorized)
 	}
 
 	// check user state
 	if user.IsActive == 0 || user.IsTrashed == 1 {
-		return user, errors.New("user not exist or inactive")
+		return "", response.WrapError(errors.New("user not exist or inactive"), http.StatusUnauthorized)
 	}
 
-	return user, nil
+	token, err = createToken(user.ID)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }
 
-func (u *userUsecase) GetByID(c context.Context, id int32) (user model.User, err error) {
+func createToken(userID int32) (string, error) {
+	jwtCfg := config.Get().Jwt
+
+	claims := &middlewares.JwtCustomClaims{
+		UserID: userID,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(jwtCfg.ExpireTime).Unix(),
+		},
+	}
+
+	unsignedToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	token, err := unsignedToken.SignedString([]byte(jwtCfg.SecretKey))
+	if err != nil {
+		return "", err
+	}
+	return token, err
+}
+
+func (u *userUsecase) GetUserDetails(c context.Context, id int32) (details *model.UserDetails, err error) {
 	ctx, cancel := context.WithTimeout(c, u.contextTimeout)
 	defer cancel()
 
-	user, err = u.repo.GetUser(ctx, id)
+	user, err := u.repo.GetUser(ctx, id)
 	if err != nil {
 		return
 	}
-	user.Hash = ""
+
+	details = &model.UserDetails{
+		FullName:        user.FullName,
+		Email:           user.Email,
+		ListViewEnabled: user.ListViewEnabled,
+		DarkModeEnabled: user.DarkModeEnabled,
+	}
 
 	return
 }

@@ -27,13 +27,11 @@ func TestCreateUser(t *testing.T) {
 
 	query := "INSERT INTO users"
 	prep := mock.ExpectPrepare(query)
-	prep.ExpectExec().WithArgs(u.FullName, u.Email, u.Hash, u.IsActive, u.UpdatedAt).WillReturnResult(sqlmock.NewResult(11, 1))
+	prep.ExpectExec().WithArgs(u.FullName, u.Email, u.Hash, u.IsActive, u.UpdatedAt).WillReturnResult(sqlmock.NewResult(1, 1))
 
 	ur := userRepo.NewPgsqlUserRepository(db)
 	err = ur.CreateUser(context.TODO(), u)
 	assert.NoError(t, err)
-	assert.Equal(t, int32(11), u.ID)
-
 }
 
 func TestGetUser(t *testing.T) {

@@ -14,15 +14,17 @@ type UserUsecase struct {
 	mock.Mock
 }
 
-// GetByID provides a mock function with given fields: c, id
-func (_m *UserUsecase) GetByID(c context.Context, id int32) (model.User, error) {
+// GetUserDetails provides a mock function with given fields: c, id
+func (_m *UserUsecase) GetUserDetails(c context.Context, id int32) (*model.UserDetails, error) {
 	ret := _m.Called(c, id)
 
-	var r0 model.User
-	if rf, ok := ret.Get(0).(func(context.Context, int32) model.User); ok {
+	var r0 *model.UserDetails
+	if rf, ok := ret.Get(0).(func(context.Context, int32) *model.UserDetails); ok {
 		r0 = rf(c, id)
 	} else {
-		r0 = ret.Get(0).(model.User)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.UserDetails)
+		}
 	}
 
 	var r1 error
@@ -36,14 +38,14 @@ func (_m *UserUsecase) GetByID(c context.Context, id int32) (model.User, error) 
 }
 
 // Login provides a mock function with given fields: c, email, password
-func (_m *UserUsecase) Login(c context.Context, email string, password string) (model.User, error) {
+func (_m *UserUsecase) Login(c context.Context, email string, password string) (string, error) {
 	ret := _m.Called(c, email, password)
 
-	var r0 model.User
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) model.User); ok {
+	var r0 string
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) string); ok {
 		r0 = rf(c, email, password)
 	} else {
-		r0 = ret.Get(0).(model.User)
+		r0 = ret.Get(0).(string)
 	}
 
 	var r1 error

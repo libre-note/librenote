@@ -5,29 +5,10 @@ import (
 	"github.com/labstack/echo/v4"
 	"librenote/app/model"
 	"librenote/app/response"
+	"librenote/app/validation"
+	"librenote/infrastructure/middlewares"
 	"time"
 )
-
-type jwtCustomClaims struct {
-	ID int32 `json:"id"`
-	jwt.StandardClaims
-}
-
-//// generate token
-//jwtCfg := config.Get().Jwt
-//claims := &jwtCustomClaims{
-//user.ID,
-//jwt.StandardClaims{
-//ExpiresAt: time.Now().Add(jwtCfg.ExpireTime * time.Second).Unix(),
-//},
-//}
-//
-//unsignedToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-//token, err = unsignedToken.SignedString([]byte(jwtCfg.SecretKey))
-//if err != nil {
-//return "", err
-//}
-//return token, err
 
 // UserHandler represent the http handler for user
 type UserHandler struct {
@@ -41,6 +22,11 @@ func NewUserHandler(e *echo.Echo, us model.UserUsecase) {
 
 	v1 := e.Group("/api/v1")
 	v1.POST("/registration", handler.Registration)
+	v1.POST("/login", handler.Login)
+
+	me := e.Group("/api/v1/me")
+	_ = middlewares.AttachJwtToGroup(me)
+	me.GET("", handler.Me)
 }
 
 func (u *UserHandler) Registration(c echo.Context) error {
@@ -50,8 +36,8 @@ func (u *UserHandler) Registration(c echo.Context) error {
 		return c.JSON(response.RespondError(response.ErrUnprocessableEntity, err))
 	}
 
-	if ok, err := isRegistrationReqValid(&regReq); !ok {
-		valErr, errors := formatValidationError(err)
+	if ok, err := validation.Validate(&regReq); !ok {
+		valErr, errors := validation.FormatErrors(err)
 		if valErr != nil {
 			return c.JSON(response.RespondError(response.ErrBadRequest, valErr))
 		}
@@ -73,4 +59,42 @@ func (u *UserHandler) Registration(c echo.Context) error {
 
 	return c.JSON(response.RespondSuccess("registration successful", nil))
 
+}
+
+func (u *UserHandler) Login(c echo.Context) error {
+	var lReq loginReq
+	err := c.Bind(&lReq)
+	if err != nil {
+		return c.JSON(response.RespondError(response.ErrUnprocessableEntity, err))
+	}
+
+	if ok, err := validation.Validate(&lReq); !ok {
+		valErr, errors := validation.FormatErrors(err)
+		if valErr != nil {
+			return c.JSON(response.RespondError(response.ErrBadRequest, valErr))
+		}
+		return c.JSON(response.RespondValidationError(response.ErrBadRequest, errors))
+	}
+
+	ctx := c.Request().Context()
+	token, err := u.UUseCase.Login(ctx, lReq.Email, lReq.Password)
+	if err != nil {
+		return c.JSON(response.RespondError(err))
+	}
+
+	return c.JSON(response.RespondLoginSuccess(token))
+
+}
+
+func (u *UserHandler) Me(c echo.Context) error {
+	token := c.Get("user").(*jwt.Token)
+	userID := token.Claims.(*middlewares.JwtCustomClaims).UserID
+
+	ctx := c.Request().Context()
+	details, err := u.UUseCase.GetUserDetails(ctx, userID)
+	if err != nil {
+		return c.JSON(response.RespondError(err))
+	}
+
+	return c.JSON(response.RespondSuccess("request success", details))
 }

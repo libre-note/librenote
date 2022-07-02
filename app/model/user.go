@@ -19,6 +19,13 @@ type User struct {
 	UpdatedAt       time.Time `json:"updated_at"`
 }
 
+type UserDetails struct {
+	FullName        string `json:"full_name"`
+	Email           string `json:"email"`
+	ListViewEnabled int8   `json:"list_view_enabled"`
+	DarkModeEnabled int8   `json:"dark_mode_enabled"`
+}
+
 // UserRepository represent the user's repository contract
 type UserRepository interface {
 	CreateUser(tx context.Context, user *User) error
@@ -37,7 +44,7 @@ type Password struct {
 // UserUsecase represent the user's usecase contract
 type UserUsecase interface {
 	Registration(c context.Context, m *User) (err error)
-	Login(c context.Context, email, password string) (user User, err error)
-	GetByID(c context.Context, id int32) (user User, err error)
+	Login(c context.Context, email, password string) (token string, err error)
+	GetUserDetails(c context.Context, id int32) (user *UserDetails, err error)
 	Update(c context.Context, m *User, p Password) error
 }

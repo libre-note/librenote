@@ -75,10 +75,10 @@ func TestLogin(t *testing.T) {
 			Return(existingUser, nil).Once()
 
 		u := usecase.NewUserUsecase(mockUserRepo, time.Second*2)
-		user, err := u.Login(context.TODO(), "mrtest@example.com", "super_password")
+		token, err := u.Login(context.TODO(), "mrtest@example.com", "super_password")
 
 		assert.NoError(t, err)
-		assert.Equal(t, existingUser.FullName, user.FullName)
+		assert.NotEqual(t, "", token)
 		mockUserRepo.AssertExpectations(t)
 	})
 
@@ -122,17 +122,19 @@ func TestLogin(t *testing.T) {
 	})
 }
 
-func TestGetByID(t *testing.T) {
+func TestGetUserDetails(t *testing.T) {
 	mockUserRepo := new(mocks.UserRepository)
 
 	hash, _ := bcrypt.GenerateFromPassword([]byte("super_password"), bcrypt.MinCost)
 	mockUser := model.User{
-		ID:        1,
-		FullName:  "Mr. Test",
-		Email:     "mrtest@example.com",
-		Hash:      string(hash),
-		IsActive:  1,
-		IsTrashed: 0,
+		ID:              1,
+		FullName:        "Mr. Test",
+		Email:           "mrtest@example.com",
+		Hash:            string(hash),
+		IsActive:        1,
+		IsTrashed:       0,
+		ListViewEnabled: 1,
+		DarkModeEnabled: 1,
 	}
 
 	t.Run("success", func(t *testing.T) {
@@ -142,11 +144,11 @@ func TestGetByID(t *testing.T) {
 			Return(existingUser, nil).Once()
 
 		u := usecase.NewUserUsecase(mockUserRepo, time.Second*2)
-		user, err := u.GetByID(context.TODO(), 1)
+		details, err := u.GetUserDetails(context.TODO(), 1)
 
 		assert.NoError(t, err)
-		assert.Equal(t, existingUser.Email, user.Email)
-		assert.Equal(t, "", user.Hash)
+		assert.Equal(t, existingUser.Email, details.Email)
+		assert.Equal(t, existingUser.ListViewEnabled, details.ListViewEnabled)
 		mockUserRepo.AssertExpectations(t)
 	})
 
@@ -156,7 +158,7 @@ func TestGetByID(t *testing.T) {
 			Return(model.User{}, errors.New("no row found")).Once()
 
 		u := usecase.NewUserUsecase(mockUserRepo, time.Second*2)
-		_, err := u.GetByID(context.TODO(), 2)
+		_, err := u.GetUserDetails(context.TODO(), 2)
 
 		assert.Error(t, err)
 		mockUserRepo.AssertExpectations(t)
