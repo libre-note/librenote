@@ -10,6 +10,7 @@ import (
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database"
+	"github.com/golang-migrate/migrate/v4/database/mysql"
 	"github.com/golang-migrate/migrate/v4/database/pgx"
 	"github.com/golang-migrate/migrate/v4/database/sqlite3"
 	"github.com/golang-migrate/migrate/v4/source/file"
@@ -91,6 +92,13 @@ func migrateDatabase(state string, step int) error {
 		)
 	case "mysql":
 		driverName = "mysql"
+		dbURL = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?multiStatements=true",
+			cfg.Database.Username,
+			cfg.Database.Password,
+			cfg.Database.Host,
+			cfg.Database.Port,
+			cfg.Database.Name,
+		)
 	}
 
 	db, err := sql.Open(driverName, dbURL)
@@ -100,17 +108,23 @@ func migrateDatabase(state string, step int) error {
 	defer db.Close()
 
 	var instance database.Driver
-	if dbType == "postgres" {
+	switch dbType {
+	case "postgres":
 		instance, err = pgx.WithInstance(db, &pgx.Config{})
 		if err != nil {
 			return err
 		}
-
-	} else {
+	case "mysql":
+		instance, err = mysql.WithInstance(db, &mysql.Config{})
+		if err != nil {
+			return err
+		}
+	default:
 		instance, err = sqlite3.WithInstance(db, &sqlite3.Config{})
 		if err != nil {
 			return err
 		}
+
 	}
 
 	fSrc, err := (&file.File{}).Open(schemaPath)

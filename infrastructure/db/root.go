@@ -22,6 +22,11 @@ func Connect() {
 			logrus.Errorln(err)
 			os.Exit(1)
 		}
+	case "mysql":
+		if err := connectMysql(); err != nil {
+			logrus.Errorln(err)
+			os.Exit(1)
+		}
 	default:
 		if err := connectSqlite(); err != nil {
 			logrus.Errorln(err)

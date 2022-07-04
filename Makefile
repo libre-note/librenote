@@ -7,6 +7,7 @@ BINARY_NAME=librenote
 BIN_OUT_DIR=bin
 
 MIGRATION_PATH_PG="infrastructure/db/migrations/pgsql"
+MIGRATION_PATH_MYSQL="infrastructure/db/migrations/mysql"
 MIGRATION_PATH_SQLITE="infrastructure/db/migrations/sqlite"
 
 export PATH=$(shell go env GOPATH)/bin:$(shell echo $$PATH)
@@ -57,6 +58,12 @@ migrate-up-pg: build ## Run migration postgresql
 
 migrate-down-pg: build ## Revert migration postgresql
 	./$(BIN_OUT_DIR)/$(BINARY_NAME) migrate -p ${MIGRATION_PATH_PG} down
+
+migrate-up-mysql: ## Run migration mysql
+	./$(BIN_OUT_DIR)/$(BINARY_NAME) migrate -p ${MIGRATION_PATH_MYSQL} up
+
+migrate-down-mysql: ## Revert migration mysql
+	./$(BIN_OUT_DIR)/$(BINARY_NAME) migrate -p ${MIGRATION_PATH_MYSQL} down
 
 migrate-up-sqlite: ## Run migration sqlite
 	./$(BIN_OUT_DIR)/$(BINARY_NAME) migrate -p ${MIGRATION_PATH_SQLITE} up

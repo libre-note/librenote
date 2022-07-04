@@ -3,29 +3,28 @@ package db
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/jackc/pgx/v4/stdlib"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/sirupsen/logrus"
 	"librenote/infrastructure/config"
 )
 
 // must call once before server boot to Get() the db instance
-func connectPG() (err error) {
+func connectMysql() (err error) {
 	if dbc.DB != nil {
 		logrus.Info("db already initialized")
 		return nil
 	}
 
 	cfg := config.Get().Database
-	dbURL := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s",
+	dbURL := fmt.Sprintf("%s:%s@%s:%d/%s",
 		cfg.Username,
 		cfg.Password,
 		cfg.Host,
 		cfg.Port,
 		cfg.Name,
-		cfg.SslMode,
 	)
 
-	db, err := sql.Open("pgx", dbURL)
+	db, err := sql.Open("mysql", dbURL)
 	if err != nil {
 		return fmt.Errorf("unable to connect to database: %v\n", err)
 	}

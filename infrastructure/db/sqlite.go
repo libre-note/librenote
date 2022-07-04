@@ -3,11 +3,9 @@ package db
 import (
 	"database/sql"
 	"fmt"
-	"librenote/infrastructure/config"
-	"time"
-
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/sirupsen/logrus"
+	"librenote/infrastructure/config"
 )
 
 // must call once before server boot to Get() the db instance
@@ -33,7 +31,7 @@ func connectSqlite() (err error) {
 	}
 
 	if cfg.Database.MaxLifeTime > 0 {
-		db.SetConnMaxLifetime(cfg.Database.MaxLifeTime * time.Second)
+		db.SetConnMaxLifetime(cfg.Database.MaxLifeTime)
 	}
 
 	dbc.DB = db
