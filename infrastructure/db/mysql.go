@@ -16,7 +16,7 @@ func connectMysql() (err error) {
 	}
 
 	cfg := config.Get().Database
-	dbURL := fmt.Sprintf("%s:%s@%s:%d/%s",
+	dbURL := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s",
 		cfg.Username,
 		cfg.Password,
 		cfg.Host,

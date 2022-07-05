@@ -15,6 +15,7 @@ import (
 	systemRepo "librenote/app/system/repository"
 	systemUseCase "librenote/app/system/usecase"
 	userDelivery "librenote/app/user/delivery/http"
+	userMysqlRepo "librenote/app/user/repository/mysql"
 	userPgsqlRepo "librenote/app/user/repository/pgsql"
 	userSqliteRepo "librenote/app/user/repository/sqlite"
 	userUseCase "librenote/app/user/usecase"
@@ -83,6 +84,8 @@ func setupApiServer() *echo.Echo {
 	switch dbType {
 	case "postgres":
 		uRepo = userPgsqlRepo.NewPgsqlUserRepository(dbClient)
+	case "mysql":
+		uRepo = userMysqlRepo.NewMysqlUserRepository(dbClient)
 	default:
 		uRepo = userSqliteRepo.NewSqliteUserRepository(dbClient)
 	}

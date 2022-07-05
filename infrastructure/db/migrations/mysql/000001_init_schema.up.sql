@@ -1,5 +1,5 @@
 CREATE TABLE `users` (
-  `id` int PRIMARY KEY,
+  `id` int PRIMARY KEY AUTO_INCREMENT,
   `full_name` varchar(100) NOT NULL,
   `email` varchar(255) UNIQUE NOT NULL,
   `hash` varchar(255) NOT NULL COMMENT 'password hash',
@@ -12,7 +12,7 @@ CREATE TABLE `users` (
 );
 
 CREATE TABLE `labels` (
-  `id` int PRIMARY KEY,
+  `id` int PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
   `user_id` int NOT NULL,
   `is_trashed` tinyint(1) NOT NULL DEFAULT 0,
@@ -21,7 +21,7 @@ CREATE TABLE `labels` (
 );
 
 CREATE TABLE `notes` (
-  `id` int PRIMARY KEY,
+  `id` int PRIMARY KEY AUTO_INCREMENT,
   `user_id` int NOT NULL,
   `title` varchar(255),
   `color` varchar(10),
@@ -34,7 +34,7 @@ CREATE TABLE `notes` (
 );
 
 CREATE TABLE `notes_items` (
-  `id` int PRIMARY KEY,
+  `id` int PRIMARY KEY AUTO_INCREMENT,
   `note_id` int NOT NULL,
   `text` varchar(1000) NOT NULL,
   `is_checked` tinyint(1) NOT NULL DEFAULT 0,
