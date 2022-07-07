@@ -14,27 +14,32 @@ export PATH=$(shell go env GOPATH)/bin:$(shell echo $$PATH)
 
 .PHONY: all
 
-all: build test ## Build binary (with tests)
+all: build test.unit ## Build binary (with unit tests)
 
 help: ## Display this help screen
 	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-lint: build ## Run golangcli-lint checks
+setup:
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.44.0
+	go install golang.org/x/tools/cmd/goimports@v0.1.9
+
+lint: setup build ## Run lint checks
 	$(shell go env GOPATH)/bin/golangci-lint run
 
-fmt: ## Refactor go files with gofmt and goimports
-	go install golang.org/x/tools/cmd/goimports@v0.1.9
+fmt: setup ## Refactor go files with gofmt and goimports
 	find . -name '*.go' | while read -r file; do gofmt -w -s "$$file"; goimports -w "$$file"; done
 
-test:  ## Run tests
+test-unit:  ## Run unit tests
 	go test -v -coverprofile=coverage.txt -covermode=atomic -cover ./...
 
 clean: ## Cleans output directory
 	$(shell rm -rf $(BIN_OUT_DIR)/*)
 	$(shell rm -rf ./*.db coverage.txt)
 
-build: clean ## Build binary
+build-deps:
+	go mod vendor
+
+build: clean build-deps ## Build binary
 	go build -v -ldflags="-w -s -X librenote/app.Version=${BUILD_VERSION} -X librenote/app.BuildTime=${BUILD_TIME}" -o $(BIN_OUT_DIR)/$(BINARY_NAME)
 
 run: build ## Build and run binary
@@ -47,26 +52,38 @@ swagger: ## Creates swagger documentation as html file
 	go install github.com/swaggo/swag/cmd/swag@v1.7.9-p1
 	$(shell go env GOPATH)/bin/swag init -g _doc/api.go -o _doc
 
-docker-build:  ## Build docker image
-	docker build --build-arg BUILD_VERSION=${BUILD_VERSION} --build-arg BUILD_TIME=${BUILD_TIME} --tag ${DOCKER_IMAGE_NAME} .
-
-docker-push:  ## Push docker image
-	docker push
-
-migrate-up-pg: build ## Run migration postgresql
+migrate-up-pgsql: build ## Run migration postgresql
 	./$(BIN_OUT_DIR)/$(BINARY_NAME) migrate -p ${MIGRATION_PATH_PG} up
 
-migrate-down-pg: build ## Revert migration postgresql
+migrate-down-pgsql: build ## Revert migration postgresql
 	./$(BIN_OUT_DIR)/$(BINARY_NAME) migrate -p ${MIGRATION_PATH_PG} down
 
-migrate-up-mysql: ## Run migration mysql
+migrate-up-mysql: build ## Run migration mysql
 	./$(BIN_OUT_DIR)/$(BINARY_NAME) migrate -p ${MIGRATION_PATH_MYSQL} up
 
-migrate-down-mysql: ## Revert migration mysql
+migrate-down-mysql: build ## Revert migration mysql
 	./$(BIN_OUT_DIR)/$(BINARY_NAME) migrate -p ${MIGRATION_PATH_MYSQL} down
 
-migrate-up-sqlite: ## Run migration sqlite
+migrate-up-sqlite: build ## Run migration sqlite
 	./$(BIN_OUT_DIR)/$(BINARY_NAME) migrate -p ${MIGRATION_PATH_SQLITE} up
 
-migrate-down-sqlite: ## Revert migration sqlite
+migrate-down-sqlite: build ## Revert migration sqlite
 	./$(BIN_OUT_DIR)/$(BINARY_NAME) migrate -p ${MIGRATION_PATH_SQLITE} down
+
+docker-build: ## Build docker image
+	docker build --build-arg BUILD_VERSION=${BUILD_VERSION} --build-arg BUILD_TIME=${BUILD_TIME} --tag ${DOCKER_IMAGE_NAME} .
+
+docker-push: ## Push docker image
+	docker push
+
+docker-run: ## Run docker image with sqlite
+	mkdir -p data
+	sudo chown -R 1000:1000 data
+	docker run --name librenote_server --rm -it -p 8000:8000 \
+		-v $$(pwd)/config.yml:/app/config.yml \
+		-v $$(pwd)/infrastructure/db/migrations/sqlite:/app/migrations \
+		-v $$(pwd)/data:/persist \
+		$(DOCKER_IMAGE_NAME):latest
+
+docker-migrate: ## Run migrations inside dorker
+	docker exec librenote_server /app/librenote migrate -p /app/migrations up
