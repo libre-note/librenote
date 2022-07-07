@@ -19,9 +19,7 @@ func NewSqliteUserRepository(db *sql.DB) model.UserRepository {
 
 const createUser = `INSERT INTO users (
   full_name, email, hash, is_active, created_at, updated_at
-) VALUES (
-  $1, $2, $3, $4, $5, $6
-)
+) VALUES (?, ?, ?, ?, ?, ?)
 `
 
 func (r *userRepository) CreateUser(ctx context.Context, user *model.User) error {
@@ -45,7 +43,7 @@ func (r *userRepository) CreateUser(ctx context.Context, user *model.User) error
 }
 
 const getUser = `SELECT id, full_name, email, hash, is_active, is_trashed, list_view_enabled, dark_mode_enabled,
-created_at, updated_at FROM users WHERE id = $1 LIMIT 1
+created_at, updated_at FROM users WHERE id = ? LIMIT 1
 `
 
 func (r *userRepository) GetUser(ctx context.Context, id int32) (model.User, error) {
@@ -67,7 +65,7 @@ func (r *userRepository) GetUser(ctx context.Context, id int32) (model.User, err
 }
 
 const getUserByEmail = `SELECT id, full_name, email, hash, is_active, is_trashed, list_view_enabled, dark_mode_enabled,
-created_at, updated_at FROM users WHERE email = $1 LIMIT 1
+created_at, updated_at FROM users WHERE email = ? LIMIT 1
 `
 
 func (r *userRepository) GetUserByEmail(ctx context.Context, email string) (model.User, error) {
@@ -89,13 +87,13 @@ func (r *userRepository) GetUserByEmail(ctx context.Context, email string) (mode
 }
 
 const updateUser = `UPDATE users
-SET hash = $2,
-is_active = $3,
-is_trashed = $4,
-list_view_enabled = $5,
-dark_mode_enabled = $6,
-updated_at = $7
-WHERE id = $1
+SET hash = ?,
+is_active = ?,
+is_trashed = ?,
+list_view_enabled = ?,
+dark_mode_enabled = ?,
+updated_at = ?
+WHERE id = ?
 `
 
 func (r *userRepository) UpdateUser(ctx context.Context, user *model.User) error {
@@ -104,19 +102,24 @@ func (r *userRepository) UpdateUser(ctx context.Context, user *model.User) error
 		return err
 	}
 	res, err := stmt.ExecContext(ctx,
-		user.ID,
 		user.Hash,
 		user.IsActive,
 		user.IsTrashed,
 		user.ListViewEnabled,
 		user.DarkModeEnabled,
 		user.UpdatedAt,
+		user.ID,
 	)
+
+	if err != nil {
+		return err
+	}
 
 	affect, err := res.RowsAffected()
 	if err != nil {
 		return err
 	}
+
 	if affect != 1 {
 		return errors.New("nothing changed")
 	}

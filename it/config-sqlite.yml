@@ -1,0 +1,24 @@
+app:
+  host:
+  port: 8000
+  read_timeout: 2
+  write_timeout: 5
+  idle_timeout: 3
+  context_timeout: 2
+  request_body_limit: "5M"
+  max_page_size: 50
+  default_page_size: 20
+  data_path: ./
+  registration_open: true
+
+jwt:
+  secret_key: "super_secret_key"
+  expire_time: 600s
+
+database:
+  type: sqlite
+  name: librenote
+  max_open_conn: 1
+  max_idle_conn: 1
+  max_life_time: 10s
+  debug: false

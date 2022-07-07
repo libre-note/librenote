@@ -26,3 +26,4 @@ docs/swagger.yaml
 docs/docs.go
 config.yml
 data
+it/*.db

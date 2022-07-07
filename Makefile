@@ -30,11 +30,14 @@ fmt: setup ## Refactor go files with gofmt and goimports
 	find . -name '*.go' | while read -r file; do gofmt -w -s "$$file"; goimports -w "$$file"; done
 
 test-unit:  ## Run unit tests
-	go test -v -coverprofile=coverage.txt -covermode=atomic -cover ./...
+	go test -v -coverprofile=coverage.txt -covermode=atomic -cover ./app/...
+
+test-integration:  ## Run integration tests
+	go test -v -tags=integration ./it -count=1
 
 clean: ## Cleans output directory
 	$(shell rm -rf $(BIN_OUT_DIR)/*)
-	$(shell rm -rf ./*.db coverage.txt)
+	$(shell rm -rf ./*.db ./it/*.db coverage.txt)
 
 build-deps:
 	go mod vendor
