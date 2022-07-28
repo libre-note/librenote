@@ -3,9 +3,10 @@ package validation
 import (
 	"errors"
 	"fmt"
-	"github.com/go-playground/validator/v10"
 	"reflect"
 	"strings"
+
+	"github.com/go-playground/validator/v10"
 )
 
 func Validate(r interface{}) (bool, error) {

@@ -3,15 +3,16 @@ package it_test
 import (
 	"database/sql"
 	"fmt"
+	"librenote/infrastructure/config"
+	"librenote/infrastructure/db"
+	"testing"
+
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/sqlite3"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"librenote/infrastructure/config"
-	"librenote/infrastructure/db"
-	"testing"
 )
 
 var (

@@ -1,8 +1,9 @@
 package middlewares
 
 import (
-	"github.com/golang-jwt/jwt"
 	"librenote/infrastructure/config"
+
+	"github.com/golang-jwt/jwt"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"

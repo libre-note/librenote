@@ -1,13 +1,14 @@
 package http
 
 import (
-	"github.com/golang-jwt/jwt"
-	"github.com/labstack/echo/v4"
 	"librenote/app/model"
 	"librenote/app/response"
 	"librenote/app/validation"
 	"librenote/infrastructure/middlewares"
 	"time"
+
+	"github.com/golang-jwt/jwt"
+	"github.com/labstack/echo/v4"
 )
 
 // UserHandler represent the http handler for user
@@ -60,7 +61,6 @@ func (u *UserHandler) Registration(c echo.Context) error {
 	}
 
 	return c.JSON(response.RespondSuccess("registration successful", nil))
-
 }
 
 func (u *UserHandler) Login(c echo.Context) error {
@@ -85,7 +85,6 @@ func (u *UserHandler) Login(c echo.Context) error {
 	}
 
 	return c.JSON(response.RespondLoginSuccess(token))
-
 }
 
 func (u *UserHandler) Me(c echo.Context) error {

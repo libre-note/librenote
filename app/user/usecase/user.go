@@ -4,14 +4,15 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"github.com/golang-jwt/jwt"
-	"golang.org/x/crypto/bcrypt"
 	"librenote/app/model"
 	"librenote/app/response"
 	"librenote/infrastructure/config"
 	"librenote/infrastructure/middlewares"
 	"net/http"
 	"time"
+
+	"github.com/golang-jwt/jwt"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type userUsecase struct {

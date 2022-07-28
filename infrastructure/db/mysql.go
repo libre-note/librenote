@@ -3,9 +3,10 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"librenote/infrastructure/config"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/sirupsen/logrus"
-	"librenote/infrastructure/config"
 )
 
 // must call once before server boot to Get() the db instance

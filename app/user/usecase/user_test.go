@@ -3,14 +3,15 @@ package usecase_test
 import (
 	"context"
 	"errors"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	"golang.org/x/crypto/bcrypt"
 	"librenote/app/model"
 	"librenote/app/model/mocks"
 	"librenote/app/user/usecase"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func TestRegistration(t *testing.T) {

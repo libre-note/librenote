@@ -2,11 +2,6 @@ package http_test
 
 import (
 	"encoding/json"
-	"github.com/golang-jwt/jwt"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"io"
 	"librenote/app/model"
 	"librenote/app/model/mocks"
@@ -19,6 +14,12 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/golang-jwt/jwt"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 var BaseURLV1 = "/api/v1"

@@ -2,12 +2,13 @@ package mysql_test
 
 import (
 	"context"
-	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/stretchr/testify/assert"
 	"librenote/app/model"
 	userRepo "librenote/app/user/repository/mysql"
 	"testing"
 	"time"
+
+	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateUser(t *testing.T) {
