@@ -38,7 +38,7 @@ CREATE TABLE "notes_items" (
   "note_id" int NOT NULL,
   "text" varchar(1000) NOT NULL,
   "is_checked" smallint NOT NULL DEFAULT 0,
-  "created_at" TIMESTAMP(0) NOT NULL,
+  "created_at" TIMESTAMP(0) NOT NULL
 );
 
 CREATE TABLE "notes_labels" (

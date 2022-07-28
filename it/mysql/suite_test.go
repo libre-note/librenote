@@ -1,10 +1,10 @@
-package it_test
+package mysql
 
 import (
 	"database/sql"
 	"fmt"
 	"github.com/golang-migrate/migrate/v4"
-	_ "github.com/golang-migrate/migrate/v4/database/sqlite3"
+	_ "github.com/golang-migrate/migrate/v4/database/mysql"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -16,30 +16,36 @@ import (
 
 var (
 	connStr    string
-	schemaPath = "file://../infrastructure/db/migrations/sqlite"
+	schemaPath = "file://../../infrastructure/db/migrations/mysql"
 )
 
-type SqliteRepositoryTestSuite struct {
+type MysqlRepositoryTestSuite struct {
 	db *sql.DB
 	suite.Suite
 }
 
-func (s *SqliteRepositoryTestSuite) SetupSuite() {
+func (s *MysqlRepositoryTestSuite) SetupSuite() {
 	if err := config.Load("./config.yml"); err != nil {
 		logrus.WithError(err).Fatal("Failed to load config")
 	}
 	cfg := config.Get()
-	connStr = fmt.Sprintf("sqlite3://%s/%s.db", cfg.App.DataPath, cfg.Database.Name)
+	connStr = fmt.Sprintf("mysql://%s:%s@tcp(%s:%d)/%s?multiStatements=true",
+		cfg.Database.Username,
+		cfg.Database.Password,
+		cfg.Database.Host,
+		cfg.Database.Port,
+		cfg.Database.Name,
+	)
 
 	db.Connect()
 	s.db = db.GetClient()
 }
 
-func TestSqliteRepositoryTestSuite(t *testing.T) {
-	suite.Run(t, &SqliteRepositoryTestSuite{})
+func TestMysqlRepositoryTestSuite(t *testing.T) {
+	suite.Run(t, &MysqlRepositoryTestSuite{})
 }
 
-func (s *SqliteRepositoryTestSuite) SetupTest() {
+func (s *MysqlRepositoryTestSuite) SetupTest() {
 	m, err := migrate.New(schemaPath, connStr)
 	assert.NoError(s.T(), err)
 
@@ -53,7 +59,7 @@ func (s *SqliteRepositoryTestSuite) SetupTest() {
 	}
 }
 
-func (s *SqliteRepositoryTestSuite) TearDownTest() {
+func (s *MysqlRepositoryTestSuite) TearDownTest() {
 	m, err := migrate.New(schemaPath, connStr)
 	assert.NoError(s.T(), err)
 	assert.NoError(s.T(), m.Down())

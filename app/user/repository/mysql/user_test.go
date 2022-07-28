@@ -118,7 +118,7 @@ func TestUpdateUser(t *testing.T) {
 
 	query := "UPDATE users SET hash = \\?, is_active = \\?, is_trashed = \\?, list_view_enabled = \\?, dark_mode_enabled = \\?, updated_at = \\? WHERE id = \\?"
 	prep := mock.ExpectPrepare(query)
-	prep.ExpectExec().WithArgs(u.ID, u.Hash, u.IsActive, u.IsTrashed, u.ListViewEnabled, u.DarkModeEnabled, u.UpdatedAt).
+	prep.ExpectExec().WithArgs(u.Hash, u.IsActive, u.IsTrashed, u.ListViewEnabled, u.DarkModeEnabled, u.UpdatedAt, u.ID).
 		WillReturnResult(sqlmock.NewResult(12, 1))
 
 	ur := userRepo.NewMysqlUserRepository(db)

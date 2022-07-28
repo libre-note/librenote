@@ -45,7 +45,7 @@ func (r *userRepository) CreateUser(ctx context.Context, user *model.User) error
 }
 
 const getUser = `SELECT id, full_name, email, hash, is_active, is_trashed, list_view_enabled, dark_mode_enabled,
-created_at, updated_at FROM users WHERE id = $1 LIMIT 1
+created_at::text, updated_at::text FROM users WHERE id = $1 LIMIT 1
 `
 
 func (r *userRepository) GetUser(ctx context.Context, id int32) (model.User, error) {
@@ -67,7 +67,7 @@ func (r *userRepository) GetUser(ctx context.Context, id int32) (model.User, err
 }
 
 const getUserByEmail = `SELECT id, full_name, email, hash, is_active, is_trashed, list_view_enabled, dark_mode_enabled,
-created_at, updated_at FROM users WHERE email = $1 LIMIT 1
+created_at::text, updated_at::text FROM users WHERE email = $1 LIMIT 1
 `
 
 func (r *userRepository) GetUserByEmail(ctx context.Context, email string) (model.User, error) {

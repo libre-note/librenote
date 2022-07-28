@@ -104,13 +104,13 @@ func (r *userRepository) UpdateUser(ctx context.Context, user *model.User) error
 		return err
 	}
 	res, err := stmt.ExecContext(ctx,
-		user.ID,
 		user.Hash,
 		user.IsActive,
 		user.IsTrashed,
 		user.ListViewEnabled,
 		user.DarkModeEnabled,
 		user.UpdatedAt,
+		user.ID,
 	)
 
 	affect, err := res.RowsAffected()

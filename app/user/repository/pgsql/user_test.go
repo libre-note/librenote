@@ -59,7 +59,7 @@ func TestGetUser(t *testing.T) {
 			mockUser.IsActive, mockUser.IsTrashed, mockUser.ListViewEnabled, mockUser.DarkModeEnabled,
 			mockUser.CreatedAt, mockUser.UpdatedAt)
 
-	query := "SELECT id, full_name, email, hash, is_active, is_trashed, list_view_enabled, dark_mode_enabled, created_at, updated_at FROM users WHERE id = \\$1 LIMIT 1"
+	query := "SELECT id, full_name, email, hash, is_active, is_trashed, list_view_enabled, dark_mode_enabled, created_at::text, updated_at::text FROM users WHERE id = \\$1 LIMIT 1"
 	mock.ExpectQuery(query).WillReturnRows(rows)
 
 	ur := userRepo.NewPgsqlUserRepository(db)
@@ -86,7 +86,7 @@ func TestGetUserByEmail(t *testing.T) {
 		"created_at", "updated_at"}).
 		AddRow(1, "Mr. Test", "mrtest@example.com", "skflrrweoiruowiu43", 1, 0, 1, 1, time.Now().UTC(), time.Now().UTC())
 
-	query := "SELECT id, full_name, email, hash, is_active, is_trashed, list_view_enabled, dark_mode_enabled, created_at, updated_at FROM users WHERE email = \\$1 LIMIT 1"
+	query := "SELECT id, full_name, email, hash, is_active, is_trashed, list_view_enabled, dark_mode_enabled, created_at::text, updated_at::text FROM users WHERE email = \\$1 LIMIT 1"
 	mock.ExpectQuery(query).WillReturnRows(rows)
 
 	ur := userRepo.NewPgsqlUserRepository(db)

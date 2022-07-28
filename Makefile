@@ -32,8 +32,14 @@ fmt: setup ## Refactor go files with gofmt and goimports
 test-unit:  ## Run unit tests
 	go test -v -coverprofile=coverage.txt -covermode=atomic -cover ./app/...
 
-test-integration:  ## Run integration tests
+test-integration:  ## Run sqlite integration tests
 	go test -v -tags=integration ./it -count=1
+
+test-integration-mysql:  ## Run mysql integration tests
+	go test -v -tags=integration ./it/mysql -count=1
+
+test-integration-pgsql:  ## Run pgsql integration tests
+	go test -v -tags=integration ./it/pgsql -count=1
 
 clean: ## Cleans output directory
 	$(shell rm -rf $(BIN_OUT_DIR)/*)

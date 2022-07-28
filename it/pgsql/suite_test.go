@@ -1,10 +1,10 @@
-package it_test
+package pgsql
 
 import (
 	"database/sql"
 	"fmt"
 	"github.com/golang-migrate/migrate/v4"
-	_ "github.com/golang-migrate/migrate/v4/database/sqlite3"
+	_ "github.com/golang-migrate/migrate/v4/database/pgx"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -16,30 +16,37 @@ import (
 
 var (
 	connStr    string
-	schemaPath = "file://../infrastructure/db/migrations/sqlite"
+	schemaPath = "file://../../infrastructure/db/migrations/pgsql"
 )
 
-type SqliteRepositoryTestSuite struct {
+type PgsqlRepositoryTestSuite struct {
 	db *sql.DB
 	suite.Suite
 }
 
-func (s *SqliteRepositoryTestSuite) SetupSuite() {
+func (s *PgsqlRepositoryTestSuite) SetupSuite() {
 	if err := config.Load("./config.yml"); err != nil {
 		logrus.WithError(err).Fatal("Failed to load config")
 	}
 	cfg := config.Get()
-	connStr = fmt.Sprintf("sqlite3://%s/%s.db", cfg.App.DataPath, cfg.Database.Name)
+	connStr = fmt.Sprintf("pgx://%s:%s@%s:%d/%s?sslmode=%s",
+		cfg.Database.Username,
+		cfg.Database.Password,
+		cfg.Database.Host,
+		cfg.Database.Port,
+		cfg.Database.Name,
+		cfg.Database.SslMode,
+	)
 
 	db.Connect()
 	s.db = db.GetClient()
 }
 
-func TestSqliteRepositoryTestSuite(t *testing.T) {
-	suite.Run(t, &SqliteRepositoryTestSuite{})
+func TestPgsqlRepositoryTestSuite(t *testing.T) {
+	suite.Run(t, &PgsqlRepositoryTestSuite{})
 }
 
-func (s *SqliteRepositoryTestSuite) SetupTest() {
+func (s *PgsqlRepositoryTestSuite) SetupTest() {
 	m, err := migrate.New(schemaPath, connStr)
 	assert.NoError(s.T(), err)
 
@@ -53,7 +60,7 @@ func (s *SqliteRepositoryTestSuite) SetupTest() {
 	}
 }
 
-func (s *SqliteRepositoryTestSuite) TearDownTest() {
+func (s *PgsqlRepositoryTestSuite) TearDownTest() {
 	m, err := migrate.New(schemaPath, connStr)
 	assert.NoError(s.T(), err)
 	assert.NoError(s.T(), m.Down())
