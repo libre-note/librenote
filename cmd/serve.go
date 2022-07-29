@@ -12,7 +12,9 @@ func serveCommand() *cobra.Command {
 		Short: "Serve serves the librenote api service",
 		Long:  `Serve serves the librenote api service`,
 		Run: func(cmd *cobra.Command, args []string) {
-			server.Serve()
+			serverReady := make(chan bool)
+			s := server.Server{ServerReady: serverReady}
+			s.Serve()
 		},
 	}
 }

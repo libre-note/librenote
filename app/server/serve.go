@@ -27,38 +27,46 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func Serve() {
+type Server struct {
+	ServerReady chan bool
+}
 
-	e := setupApiServer()
+func (s *Server) Serve() {
+	cfg := config.Get().App
+
+	db.Connect()
+	if cfg.Env != "test" {
+		defer db.Close()
+	}
+
+	e := setupApiServer(cfg)
+
+	go func() {
+		printBanner()
+		if err := e.Start(fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)); err != nil {
+			logrus.Errorf(err.Error())
+		}
+	}()
+
+	// server is ready now, so close the channel
+	close(s.ServerReady)
 
 	// signal channel to capture system calls
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 
-	// goroutine to handle shutdown
-	go func() {
-		// capture sigterm and other system call here
-		<-sigCh
-		logrus.Info("terminating...")
+	<-sigCh
+	logrus.Info("shutting down the server...")
 
-		// close db connection
-		db.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := e.Shutdown(ctx); err != nil {
+		logrus.Fatalf("failed to gracefully shutdown the server: %s", err)
+	}
 
-		// shutdown http server
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		_ = e.Shutdown(ctx)
-
-	}()
-
-	// start http server
-	printBanner()
-	e.Logger.Fatal(e.Start(fmt.Sprintf("%s:%d", config.Get().App.Host, config.Get().App.Port)))
 }
 
-func setupApiServer() *echo.Echo {
-	cfg := config.Get().App
-
+func setupApiServer(cfg config.AppConfig) *echo.Echo {
 	e := echo.New()
 	e.HideBanner = true
 	e.Server.ReadTimeout = cfg.ReadTimeout * time.Second
@@ -66,14 +74,11 @@ func setupApiServer() *echo.Echo {
 	e.Server.IdleTimeout = cfg.IdleTimeout * time.Second
 	contextTimeout := cfg.ContextTimeout * time.Second
 
-	// e.Validator = &validator.GenericValidator{}
-	// fetch infra and routes
 	if err := middlewares.Attach(e); err != nil {
 		logrus.Errorln(err)
 		os.Exit(1)
 	}
 
-	db.Connect()
 	dbClient := db.GetClient()
 	dbType := config.Get().Database.Type
 
@@ -116,5 +121,4 @@ func printBanner() {
 	log.Printf("_/                   Version: %-18s Build time: %-18s             _/", app.Version, app.BuildTime)
 	log.Println("_/                                                                                          _/")
 	log.Println("_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/")
-
 }

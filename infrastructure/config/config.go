@@ -16,16 +16,17 @@ type Config struct {
 
 // AppConfig app specific config
 type AppConfig struct {
+	Env              string `mapstructure:"env"`
 	DataPath         string `mapstructure:"data_path"`
 	RequestBodyLimit string `mapstructure:"request_body_limit"`
 	DateFormat       string
 	TimestampFormat  string
 	Host             string        `mapstructure:"host"`
-	Port             int           `mapstructure:"port"`
 	ReadTimeout      time.Duration `mapstructure:"read_timeout"`
 	WriteTimeout     time.Duration `mapstructure:"write_timeout"`
 	IdleTimeout      time.Duration `mapstructure:"idle_timeout"`
 	ContextTimeout   time.Duration `mapstructure:"context_timeout"`
+	Port             int           `mapstructure:"port"`
 	MaxPageSize      int           `mapstructure:"max_page_size"`
 	DefaultPageSize  int           `mapstructure:"default_page_size"`
 	RegistrationOpen bool          `mapstructure:"registration_open"`
@@ -39,10 +40,10 @@ type DatabaseConfig struct {
 	Username    string        `mapstructure:"username"`
 	Password    string        `mapstructure:"password"`
 	SslMode     string        `mapstructure:"ssl_mode"`
+	MaxLifeTime time.Duration `mapstructure:"max_life_time"`
 	Port        int           `mapstructure:"port"`
 	MaxOpenConn int           `mapstructure:"max_open_conn"`
 	MaxIdleConn int           `mapstructure:"max_idle_conn"`
-	MaxLifeTime time.Duration `mapstructure:"max_life_time"`
 	Debug       bool          `mapstructure:"debug"`
 }
 
