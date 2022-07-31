@@ -43,7 +43,7 @@ test-integration-pgsql:  ## Run pgsql integration tests
 
 clean: ## Cleans output directory
 	$(shell rm -rf $(BIN_OUT_DIR)/*)
-	$(shell rm -rf ./*.db ./it/*.db coverage.txt)
+	$(shell rm -rf ./*.db ./it/*.db coverage.txt _doc/docs.go _doc/swagger.json _doc/swagger.yaml)
 
 build-deps:
 	go mod vendor
@@ -57,9 +57,10 @@ run: build ## Build and run binary
 serve: build ## Run http server
 	./$(BIN_OUT_DIR)/$(BINARY_NAME) serve
 
-swagger: ## Creates swagger documentation as html file
-	go install github.com/swaggo/swag/cmd/swag@v1.7.9-p1
+doc: ## Creates swagger documentation as html file
+	go install github.com/swaggo/swag/cmd/swag@v1.8.4
 	$(shell go env GOPATH)/bin/swag init -g _doc/api.go -o _doc
+	$(shell which redoc-cli) build --options.disableSearch --options.hideDownloadButton -o _doc/swagger.html _doc/swagger.json
 
 migrate-up-pgsql: build ## Run migration postgresql
 	./$(BIN_OUT_DIR)/$(BINARY_NAME) migrate -p ${MIGRATION_PATH_PG} up

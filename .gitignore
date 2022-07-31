@@ -21,9 +21,9 @@ vendor
 
 # Misc
 bin/
-docs/swagger.json
-docs/swagger.yaml
-docs/docs.go
+_doc/swagger.json
+_doc/swagger.yaml
+_doc/docs.go
 config.yml
 data
 it/*.db
