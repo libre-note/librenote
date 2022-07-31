@@ -1,4 +1,4 @@
-package it
+package pgsql
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"librenote/app/model"
 	"librenote/app/response"
 	"librenote/app/server"
-	repo "librenote/app/user/repository/sqlite"
+	repo "librenote/app/user/repository/pgsql"
 	"librenote/infrastructure/config"
 	"librenote/infrastructure/db"
 	"net/http"
@@ -40,10 +40,17 @@ func (s *e2eTestSuite) SetupSuite() {
 	s.Require().NoError(config.Load("./config.yml"))
 
 	cfg := config.Get()
-	connectionStr := fmt.Sprintf("sqlite3://%s/%s.db", cfg.App.DataPath, cfg.Database.Name)
+	connStr = fmt.Sprintf("pgx://%s:%s@%s:%d/%s?sslmode=%s",
+		cfg.Database.Username,
+		cfg.Database.Password,
+		cfg.Database.Host,
+		cfg.Database.Port,
+		cfg.Database.Name,
+		cfg.Database.SslMode,
+	)
 	var err error
 
-	s.dbMigration, err = migrate.New("file://../infrastructure/db/migrations/sqlite", connectionStr)
+	s.dbMigration, err = migrate.New("file://../../infrastructure/db/migrations/pgsql", connStr)
 	s.Require().NoError(err)
 	if err := s.dbMigration.Up(); err != nil && err != migrate.ErrNoChange {
 		s.Require().NoError(err)
@@ -144,7 +151,7 @@ func (s *e2eTestSuite) createUser(howMany int) {
 		s.Assert().NoError(err)
 		newUser.Hash = string(hash)
 
-		r := repo.NewSqliteUserRepository(s.db)
+		r := repo.NewPgsqlUserRepository(s.db)
 		s.Assert().NoError(r.CreateUser(context.Background(), newUser))
 	}
 }
