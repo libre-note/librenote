@@ -9,7 +9,8 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-const EchoLogFormat = "time: ${time_rfc3339_nano} || ${method}: ${uri} || u_agent: ${user_agent} || status: ${status} || latency: ${latency_human} \n"
+const EchoLogFormat = "time: ${time_rfc3339_nano} || ${method}: ${uri} || u_agent: ${user_agent} || status: ${status}" +
+	" || latency: ${latency_human} \n"
 
 type JwtCustomClaims struct {
 	UserID int32 `json:"user_id"`

@@ -35,6 +35,7 @@ func (sh *SystemHandler) Health(c echo.Context) error {
 	if err != nil {
 		return c.JSON(response.RespondError(err))
 	}
+
 	return c.JSON(http.StatusOK, &response.Response{Success: true, Message: "I'm healthy :)"})
 }
 

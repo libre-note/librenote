@@ -146,6 +146,7 @@ func buildEchoAuthorizedRequest(t *testing.T, method, path, token string) (echo.
 	res := httptest.NewRecorder()
 	e := echo.New()
 	ctx := e.NewContext(req, res)
+
 	return ctx, res
 }
 
@@ -159,6 +160,7 @@ func getToken(userID int32) string {
 	}
 	unsignedToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	token, _ := unsignedToken.SignedString([]byte(jwtCfg.SecretKey))
+
 	return token
 }
 
@@ -195,7 +197,7 @@ func TestMe(t *testing.T) {
 		assert.Equal(t, http.StatusOK, res.Code)
 
 		var r response.Response
-		assert.NoError(t, json.Unmarshal([]byte(res.Body.String()), &r))
+		assert.NoError(t, json.Unmarshal(res.Body.Bytes(), &r))
 		assert.True(t, true, r.Success)
 
 		resultsMap := r.Results.(map[string]interface{})

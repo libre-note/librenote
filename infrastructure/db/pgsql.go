@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"librenote/infrastructure/config"
 
-	_ "github.com/jackc/pgx/v4/stdlib"
+	_ "github.com/jackc/pgx/v4/stdlib" // load pgsql driver
 	"github.com/sirupsen/logrus"
 )
 
@@ -28,7 +28,7 @@ func connectPG() (err error) {
 
 	db, err := sql.Open("pgx", dbURL)
 	if err != nil {
-		return fmt.Errorf("unable to connect to database: %v\n", err)
+		return fmt.Errorf("unable to connect to database: %w", err)
 	}
 
 	if cfg.MaxOpenConn > 0 {
@@ -44,5 +44,6 @@ func connectPG() (err error) {
 	}
 
 	dbc.DB = db
+
 	return nil
 }

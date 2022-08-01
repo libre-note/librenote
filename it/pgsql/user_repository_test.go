@@ -25,6 +25,7 @@ func (s *PgsqlRepositoryTestSuite) TestPgsqlUserRepository_CreateUser() {
 
 	query := "SELECT id, full_name, created_at::text FROM users LIMIT 1"
 	row := s.db.QueryRowContext(context.Background(), query)
+
 	var res model.User
 	err := row.Scan(
 		&res.ID,
@@ -59,7 +60,6 @@ func (s *PgsqlRepositoryTestSuite) TestPgsqlUserRepository_GetUserByID() {
 	s.Assert().NoError(err)
 	s.Assert().Equal(newUser.FullName, result.FullName)
 	s.Assert().Equal(newUser.CreatedAt, newUser.CreatedAt)
-
 }
 
 func (s *PgsqlRepositoryTestSuite) TestPgsqlUserRepository_GetUserByEmail() {

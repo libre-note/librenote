@@ -35,14 +35,16 @@ func (s *Server) Serve() {
 	cfg := config.Get().App
 
 	db.Connect()
+
 	if cfg.Env != "test" {
 		defer db.Close()
 	}
 
-	e := setupApiServer(cfg)
+	e := setupAPIServer(cfg)
 
 	go func() {
 		printBanner()
+
 		if err := e.Start(fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)); err != nil {
 			logrus.Errorf(err.Error())
 		}
@@ -60,19 +62,19 @@ func (s *Server) Serve() {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
+
 	if err := e.Shutdown(ctx); err != nil {
 		logrus.Fatalf("failed to gracefully shutdown the server: %s", err)
 	}
-
 }
 
-func setupApiServer(cfg config.AppConfig) *echo.Echo {
+func setupAPIServer(cfg config.AppConfig) *echo.Echo {
 	e := echo.New()
 	e.HideBanner = true
-	e.Server.ReadTimeout = cfg.ReadTimeout * time.Second
-	e.Server.WriteTimeout = cfg.WriteTimeout * time.Second
-	e.Server.IdleTimeout = cfg.IdleTimeout * time.Second
-	contextTimeout := cfg.ContextTimeout * time.Second
+	e.Server.ReadTimeout = cfg.ReadTimeout
+	e.Server.WriteTimeout = cfg.WriteTimeout
+	e.Server.IdleTimeout = cfg.IdleTimeout
+	contextTimeout := cfg.ContextTimeout
 
 	if err := middlewares.Attach(e); err != nil {
 		logrus.Errorln(err)
@@ -84,6 +86,7 @@ func setupApiServer(cfg config.AppConfig) *echo.Echo {
 
 	// repository
 	sysRepo := systemRepo.NewSystemRepository(dbClient)
+
 	var uRepo model.UserRepository
 
 	switch dbType {

@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+//nolint:unused,deadcode
 func newVersionCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "version",
@@ -16,6 +17,7 @@ func newVersionCommand() *cobra.Command {
 	}
 }
 
+//nolint:unused
 func printVersion(_ *cobra.Command, _ []string) {
 	fmt.Println("LibreNote Core")
 	fmt.Printf("Version: %s\n", app.Version)

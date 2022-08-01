@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// nolint:gochecknoglobals
 var configPath string
 
 func rootCommand() *cobra.Command {
@@ -19,8 +20,13 @@ func rootCommand() *cobra.Command {
 
 	c.PersistentFlags().StringVarP(&configPath, "config", "c", "./config.yml", "path to config file")
 
+	//nolint:typecheck
 	c.AddCommand(newVersionCommand())
+
+	//nolint:typecheck
 	c.AddCommand(migrateCommand())
+
+	//nolint:typecheck
 	c.AddCommand(serveCommand())
 
 	return c

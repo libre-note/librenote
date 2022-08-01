@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"librenote/app/model"
@@ -48,11 +49,13 @@ func (s *e2eTestSuite) SetupSuite() {
 		cfg.Database.Name,
 		cfg.Database.SslMode,
 	)
+
 	var err error
 
 	s.dbMigration, err = migrate.New("file://../../infrastructure/db/migrations/pgsql", connStr)
 	s.Require().NoError(err)
-	if err := s.dbMigration.Up(); err != nil && err != migrate.ErrNoChange {
+
+	if err := s.dbMigration.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		s.Require().NoError(err)
 	}
 
@@ -70,11 +73,11 @@ func (s *e2eTestSuite) SetupSuite() {
 
 func (s *e2eTestSuite) TearDownSuite() {
 	p, _ := os.FindProcess(syscall.Getpid())
-	p.Signal(syscall.SIGINT)
+	_ = p.Signal(syscall.SIGINT)
 }
 
 func (s *e2eTestSuite) SetupTest() {
-	if err := s.dbMigration.Up(); err != nil && err != migrate.ErrNoChange {
+	if err := s.dbMigration.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		s.Require().NoError(err)
 	}
 }
@@ -99,6 +102,7 @@ func (s *e2eTestSuite) Test_EndToEnd_RegisterUser() {
 	s.NoError(err)
 
 	s.Equal(`{"success":true,"message":"registration successful"}`, strings.Trim(string(byteBody), "\n"))
+
 	_ = res.Body.Close()
 }
 
@@ -110,7 +114,6 @@ func (s *e2eTestSuite) Test_EndToEnd_LoginUser() {
 }
 
 func (s *e2eTestSuite) doLogin(payload string) string {
-
 	req, err := http.NewRequest(echo.POST, s.apiBaseURL+"/login", strings.NewReader(payload))
 	s.NoError(err)
 
@@ -124,9 +127,11 @@ func (s *e2eTestSuite) doLogin(payload string) string {
 
 	byteBody, err := ioutil.ReadAll(res.Body)
 	s.NoError(err)
+
 	_ = res.Body.Close()
 
 	var r response.Response
+
 	s.NoError(json.Unmarshal(byteBody, &r))
 
 	s.True(true, r.Success)
@@ -148,10 +153,12 @@ func (s *e2eTestSuite) createUser(howMany int) {
 			UpdatedAt: nowTime,
 		}
 		hash, err := bcrypt.GenerateFromPassword([]byte(newUser.Hash), bcrypt.MinCost)
-		s.Assert().NoError(err)
-		newUser.Hash = string(hash)
 
+		s.Assert().NoError(err)
+
+		newUser.Hash = string(hash)
 		r := repo.NewPgsqlUserRepository(s.db)
+
 		s.Assert().NoError(r.CreateUser(context.Background(), newUser))
 	}
 }
@@ -175,10 +182,13 @@ func (s *e2eTestSuite) Test_EndToEnd_Me() {
 	s.Equal(http.StatusOK, res.StatusCode)
 
 	byteBody, err := ioutil.ReadAll(res.Body)
+
 	s.NoError(err)
+
 	_ = res.Body.Close()
 
 	var r response.Response
+
 	s.NoError(json.Unmarshal(byteBody, &r))
 
 	s.True(true, r.Success)

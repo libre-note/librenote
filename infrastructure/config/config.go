@@ -53,16 +53,11 @@ type JwtConfig struct {
 }
 
 // c is the configuration instance
-var c Config
+var c Config //nolint:gochecknoglobals
 
 // Get returns all configurations
 func Get() Config {
 	return c
-}
-
-// Set only for test purpose
-func Set(cf Config) {
-	c = cf
 }
 
 // Load the config
@@ -72,10 +67,11 @@ func Load(path string) error {
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
-		return fmt.Errorf("failed to read config: %v", err)
+		return fmt.Errorf("failed to read config: %w", err)
 	}
+
 	if err := viper.Unmarshal(&c); err != nil {
-		return fmt.Errorf("failed to unmarshal consul config: %v", err)
+		return fmt.Errorf("failed to unmarshal consul config: %w", err)
 	}
 
 	if c.App.RequestBodyLimit == "" {
@@ -85,6 +81,7 @@ func Load(path string) error {
 	if c.App.MaxPageSize <= 5 {
 		c.App.MaxPageSize = 50
 	}
+
 	if c.App.DefaultPageSize <= 5 {
 		c.App.DefaultPageSize = 30
 	}
@@ -97,6 +94,7 @@ func Load(path string) error {
 	if dataPath == "" {
 		dataPath = "."
 	}
+
 	c.App.DataPath = dataPath
 
 	return nil

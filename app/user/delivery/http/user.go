@@ -32,16 +32,18 @@ func NewUserHandler(e *echo.Echo, us model.UserUsecase) {
 
 func (u *UserHandler) Registration(c echo.Context) error {
 	var regReq registrationReq
+
 	err := c.Bind(&regReq)
 	if err != nil {
 		return c.JSON(response.RespondError(response.ErrUnprocessableEntity, err))
 	}
 
 	if ok, err := validation.Validate(&regReq); !ok {
-		valErr, errors := validation.FormatErrors(err)
+		errors, valErr := validation.FormatErrors(err)
 		if valErr != nil {
 			return c.JSON(response.RespondError(response.ErrBadRequest, valErr))
 		}
+
 		return c.JSON(response.RespondValidationError(response.ErrBadRequest, errors))
 	}
 
@@ -54,7 +56,9 @@ func (u *UserHandler) Registration(c echo.Context) error {
 		CreatedAt: nowTime,
 		UpdatedAt: nowTime,
 	}
+
 	ctx := c.Request().Context()
+
 	err = u.UUseCase.Registration(ctx, &user)
 	if err != nil {
 		return c.JSON(response.RespondError(err))
@@ -65,20 +69,23 @@ func (u *UserHandler) Registration(c echo.Context) error {
 
 func (u *UserHandler) Login(c echo.Context) error {
 	var lReq loginReq
+
 	err := c.Bind(&lReq)
 	if err != nil {
 		return c.JSON(response.RespondError(response.ErrUnprocessableEntity, err))
 	}
 
 	if ok, err := validation.Validate(&lReq); !ok {
-		valErr, errors := validation.FormatErrors(err)
+		errors, valErr := validation.FormatErrors(err)
 		if valErr != nil {
 			return c.JSON(response.RespondError(response.ErrBadRequest, valErr))
 		}
+
 		return c.JSON(response.RespondValidationError(response.ErrBadRequest, errors))
 	}
 
 	ctx := c.Request().Context()
+
 	token, err := u.UUseCase.Login(ctx, lReq.Email, lReq.Password)
 	if err != nil {
 		return c.JSON(response.RespondError(err))
@@ -92,6 +99,7 @@ func (u *UserHandler) Me(c echo.Context) error {
 	userID := token.Claims.(*middlewares.JwtCustomClaims).UserID
 
 	ctx := c.Request().Context()
+
 	details, err := u.UUseCase.GetUserDetails(ctx, userID)
 	if err != nil {
 		return c.JSON(response.RespondError(err))

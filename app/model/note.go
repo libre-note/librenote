@@ -4,7 +4,7 @@ import (
 	"database/sql"
 )
 
-//var Colors = map[string]string{
+// var Colors = map[string]string{
 //	"red":       "red",
 //	"orange":    "orange",
 //	"yellow":    "yellow",
@@ -16,12 +16,12 @@ import (
 //	"pink":      "pink",
 //	"brown":     "brown",
 //	"gray":      "gray",
-//}
+// }
 //
-//var NoteTypes = map[string]string{
+// var NoteTypes = map[string]string{
 //	"note": "note",
 //	"list": "list",
-//}
+// }
 
 type Note struct {
 	ID         int32          `json:"id"`

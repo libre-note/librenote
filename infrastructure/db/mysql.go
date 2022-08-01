@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"librenote/infrastructure/config"
 
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql" // load mysql
 	"github.com/sirupsen/logrus"
 )
 
@@ -27,7 +27,7 @@ func connectMysql() (err error) {
 
 	db, err := sql.Open("mysql", dbURL)
 	if err != nil {
-		return fmt.Errorf("unable to connect to database: %v\n", err)
+		return fmt.Errorf("unable to connect to database: %w", err)
 	}
 
 	if cfg.MaxOpenConn > 0 {
@@ -43,5 +43,6 @@ func connectMysql() (err error) {
 	}
 
 	dbc.DB = db
+
 	return nil
 }

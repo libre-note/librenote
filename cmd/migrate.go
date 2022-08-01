@@ -18,7 +18,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// nolint:gochecknoglobals
 var schemaPath string
+
+const (
+	DBPgsql = "postgres"
+	DBMysql = "mysql"
+)
 
 func migrateCommand() *cobra.Command {
 	c := &cobra.Command{
@@ -73,6 +79,7 @@ func migrateCommand() *cobra.Command {
 	return c
 }
 
+// nolint:funlen
 func migrateDatabase(state string, step int) error {
 	cfg := config.Get()
 	dbType := cfg.Database.Type
@@ -80,7 +87,7 @@ func migrateDatabase(state string, step int) error {
 	dbURL := fmt.Sprintf("%s/%s.db", cfg.App.DataPath, cfg.Database.Name)
 
 	switch dbType {
-	case "postgres":
+	case DBPgsql:
 		driverName = "pgx"
 		dbURL = fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s",
 			cfg.Database.Username,
@@ -90,7 +97,7 @@ func migrateDatabase(state string, step int) error {
 			cfg.Database.Name,
 			cfg.Database.SslMode,
 		)
-	case "mysql":
+	case DBMysql:
 		driverName = "mysql"
 		dbURL = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?multiStatements=true",
 			cfg.Database.Username,
@@ -105,16 +112,18 @@ func migrateDatabase(state string, step int) error {
 	if err != nil {
 		return err
 	}
+
 	defer db.Close()
 
 	var instance database.Driver
+
 	switch dbType {
-	case "postgres":
+	case DBPgsql:
 		instance, err = pgx.WithInstance(db, &pgx.Config{})
 		if err != nil {
 			return err
 		}
-	case "mysql":
+	case DBMysql:
 		instance, err = mysql.WithInstance(db, &mysql.Config{})
 		if err != nil {
 			return err
@@ -124,7 +133,6 @@ func migrateDatabase(state string, step int) error {
 		if err != nil {
 			return err
 		}
-
 	}
 
 	fSrc, err := (&file.File{}).Open(schemaPath)

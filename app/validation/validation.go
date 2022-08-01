@@ -18,24 +18,29 @@ func Validate(r interface{}) (bool, error) {
 		}
 		return name
 	})
+
 	err := validate.Struct(r)
 	if err != nil {
 		return false, err
 	}
+
 	return true, nil
 }
 
-func FormatErrors(err error) (error, map[string]interface{}) {
+func FormatErrors(err error) (map[string]interface{}, error) {
 	var ve validator.ValidationErrors
 	if errors.As(err, &ve) {
 		out := make(map[string]interface{}, len(ve))
+
 		for _, fe := range ve {
 			fieldName := fe.Field()
 			out[fieldName] = msgForField(fe)
 		}
-		return nil, out
+
+		return out, nil
 	}
-	return err, nil
+
+	return nil, err
 }
 
 func msgForField(fe validator.FieldError) string {
@@ -49,12 +54,14 @@ func msgForField(fe validator.FieldError) string {
 		if fe.Type().String() == "string" {
 			return m + " characters"
 		}
+
 		return m
 	case "max":
 		m := fmt.Sprintf("Not more than %v", fe.Param())
 		if fe.Type().String() == "string" {
 			return m + " characters"
 		}
+
 		return m
 	}
 

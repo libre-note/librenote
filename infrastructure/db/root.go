@@ -12,6 +12,7 @@ type dbClient struct {
 	DB *sql.DB
 }
 
+//nolint:gochecknoglobals
 var dbc = &dbClient{}
 
 func Connect() {

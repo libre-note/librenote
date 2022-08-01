@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"librenote/infrastructure/config"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/mattn/go-sqlite3" // load sqlite driver
 	"github.com/sirupsen/logrus"
 )
 
@@ -20,7 +20,7 @@ func connectSqlite() (err error) {
 
 	db, err := sql.Open("sqlite3", fmt.Sprintf("%s/%s.db", cfg.App.DataPath, cfg.Database.Name))
 	if err != nil {
-		return fmt.Errorf("unable to connect to database: %v\n", err)
+		return fmt.Errorf("unable to connect to database: %w", err)
 	}
 
 	if cfg.Database.MaxOpenConn > 0 {
@@ -36,5 +36,6 @@ func connectSqlite() (err error) {
 	}
 
 	dbc.DB = db
+
 	return nil
 }

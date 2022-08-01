@@ -30,6 +30,7 @@ func (r *userRepository) CreateUser(ctx context.Context, user *model.User) error
 		return err
 	}
 
+	defer stmt.Close()
 	_, err = stmt.ExecContext(ctx,
 		user.FullName,
 		user.Email,
@@ -38,10 +39,8 @@ func (r *userRepository) CreateUser(ctx context.Context, user *model.User) error
 		user.CreatedAt,
 		user.UpdatedAt,
 	)
-	if err != nil {
-		return err
-	}
-	return nil
+
+	return err
 }
 
 const getUser = `SELECT id, full_name, email, hash, is_active, is_trashed, list_view_enabled, dark_mode_enabled,
@@ -50,6 +49,7 @@ created_at, updated_at FROM users WHERE id = ? LIMIT 1
 
 func (r *userRepository) GetUser(ctx context.Context, id int32) (model.User, error) {
 	row := r.db.QueryRowContext(ctx, getUser, id)
+
 	var i model.User
 	err := row.Scan(
 		&i.ID,
@@ -63,6 +63,7 @@ func (r *userRepository) GetUser(ctx context.Context, id int32) (model.User, err
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
+
 	return i, err
 }
 
@@ -72,6 +73,7 @@ created_at, updated_at FROM users WHERE email = ? LIMIT 1
 
 func (r *userRepository) GetUserByEmail(ctx context.Context, email string) (model.User, error) {
 	row := r.db.QueryRowContext(ctx, getUserByEmail, email)
+
 	var i model.User
 	err := row.Scan(
 		&i.ID,
@@ -85,6 +87,7 @@ func (r *userRepository) GetUserByEmail(ctx context.Context, email string) (mode
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
+
 	return i, err
 }
 
@@ -103,6 +106,8 @@ func (r *userRepository) UpdateUser(ctx context.Context, user *model.User) error
 	if err != nil {
 		return err
 	}
+
+	defer stmt.Close()
 	res, err := stmt.ExecContext(ctx,
 		user.Hash,
 		user.IsActive,
@@ -113,10 +118,15 @@ func (r *userRepository) UpdateUser(ctx context.Context, user *model.User) error
 		user.ID,
 	)
 
+	if err != nil {
+		return err
+	}
+
 	affect, err := res.RowsAffected()
 	if err != nil {
 		return err
 	}
+
 	if affect != 1 {
 		return errors.New("nothing changed")
 	}

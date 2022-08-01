@@ -2,6 +2,7 @@ package pgsql
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"librenote/infrastructure/config"
 	"librenote/infrastructure/db"
@@ -29,6 +30,7 @@ func (s *PgsqlRepositoryTestSuite) SetupSuite() {
 	if err := config.Load("./config.yml"); err != nil {
 		logrus.WithError(err).Fatal("Failed to load config")
 	}
+
 	cfg := config.Get()
 	connStr = fmt.Sprintf("pgx://%s:%s@%s:%d/%s?sslmode=%s",
 		cfg.Database.Username,
@@ -52,7 +54,7 @@ func (s *PgsqlRepositoryTestSuite) SetupTest() {
 	assert.NoError(s.T(), err)
 
 	if err := m.Up(); err != nil {
-		if err == migrate.ErrNoChange {
+		if errors.Is(err, migrate.ErrNoChange) {
 			// just ignore
 			return
 		}

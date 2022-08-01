@@ -38,6 +38,7 @@ func (u *systemUsecase) GetHealth() error {
 func (u *systemUsecase) GetTime() *TimeResp {
 	resp := TimeResp{}
 	resp.CurrentTimeUnix = u.repo.CurrentTime()
+
 	return &resp
 }
 

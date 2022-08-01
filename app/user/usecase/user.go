@@ -42,10 +42,12 @@ func (u *userUsecase) Registration(c context.Context, m *model.User) (err error)
 	if err != nil {
 		return
 	}
+
 	m.Hash = string(hash)
 
 	// store
 	err = u.repo.CreateUser(ctx, m)
+
 	return
 }
 
@@ -56,7 +58,6 @@ func (u *userUsecase) Login(c context.Context, email, password string) (token st
 	user, err := u.repo.GetUserByEmail(ctx, email)
 	if err != nil {
 		return "", response.WrapError(errors.New("email/password is incorrect"), http.StatusUnauthorized)
-
 	}
 
 	// check password
@@ -90,9 +91,11 @@ func createToken(userID int32) (string, error) {
 
 	unsignedToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	token, err := unsignedToken.SignedString([]byte(jwtCfg.SecretKey))
+
 	if err != nil {
 		return "", err
 	}
+
 	return token, err
 }
 
@@ -102,10 +105,11 @@ func (u *userUsecase) GetUserDetails(c context.Context, id int32) (details *mode
 
 	user, err := u.repo.GetUser(ctx, id)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, response.ErrNotFound
 		}
-		return
+
+		return nil, err
 	}
 
 	details = &model.UserDetails{
@@ -115,7 +119,7 @@ func (u *userUsecase) GetUserDetails(c context.Context, id int32) (details *mode
 		DarkModeEnabled: user.DarkModeEnabled,
 	}
 
-	return
+	return details, nil
 }
 
 func (u *userUsecase) Update(c context.Context, m *model.User, p model.Password) error {
@@ -128,15 +132,16 @@ func (u *userUsecase) Update(c context.Context, m *model.User, p model.Password)
 		if err != nil {
 			return errors.New("old password doesn't match")
 		}
+
 		// generate password salted hash
 		hash, err := bcrypt.GenerateFromPassword([]byte(p.NewPassword), bcrypt.MinCost)
 		if err != nil {
 			return err
 		}
+
 		m.Hash = string(hash)
 	}
 
 	// update
-	err := u.repo.UpdateUser(ctx, m)
-	return err
+	return u.repo.UpdateUser(ctx, m)
 }

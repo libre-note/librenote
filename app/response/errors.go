@@ -15,24 +15,25 @@ var (
 )
 
 func getStatusCode(err error) int {
-	switch err {
-	case ErrNotFound:
+	switch {
+	case errors.Is(err, ErrNotFound):
 		return http.StatusNotFound
-	case ErrInvalidPage:
+	case errors.Is(err, ErrInvalidPage):
 		return http.StatusNotFound
-	case ErrConflict:
+	case errors.Is(err, ErrConflict):
 		return http.StatusConflict
-	case ErrBadRequest:
+	case errors.Is(err, ErrBadRequest):
 		return http.StatusBadRequest
-	case ErrUnprocessableEntity:
+	case errors.Is(err, ErrUnprocessableEntity):
 		return http.StatusUnprocessableEntity
-	case ErrInternalServerError:
+	case errors.Is(err, ErrInternalServerError):
 		return http.StatusInternalServerError
 	default:
 		wrapErr := &wrapErr{}
 		if errors.As(err, wrapErr) {
 			return wrapErr.StatusCode
 		}
+
 		return http.StatusInternalServerError
 	}
 }
@@ -43,6 +44,7 @@ func RespondError(err error, customErr ...error) (int, Response) {
 	if len(customErr) > 0 {
 		return getStatusCode(err), Response{Success: false, Message: customErr[0].Error()}
 	}
+
 	return getStatusCode(err), Response{Success: false, Message: err.Error()}
 }
 

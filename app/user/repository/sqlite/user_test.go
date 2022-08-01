@@ -30,7 +30,8 @@ func TestCreateUser(t *testing.T) {
 
 	query := "INSERT INTO users"
 	prep := mock.ExpectPrepare(query)
-	prep.ExpectExec().WithArgs(u.FullName, u.Email, u.Hash, u.IsActive, u.CreatedAt, u.UpdatedAt).WillReturnResult(sqlmock.NewResult(1, 1))
+	prep.ExpectExec().WithArgs(u.FullName, u.Email, u.Hash, u.IsActive, u.CreatedAt, u.UpdatedAt).
+		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	ur := userRepo.NewSqliteUserRepository(db)
 	err = ur.CreateUser(context.TODO(), u)
@@ -38,7 +39,6 @@ func TestCreateUser(t *testing.T) {
 }
 
 func TestGetUser(t *testing.T) {
-
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
@@ -59,7 +59,8 @@ func TestGetUser(t *testing.T) {
 			mockUser.IsActive, mockUser.IsTrashed, mockUser.ListViewEnabled, mockUser.DarkModeEnabled,
 			mockUser.CreatedAt, mockUser.UpdatedAt)
 
-	query := "SELECT id, full_name, email, hash, is_active, is_trashed, list_view_enabled, dark_mode_enabled, created_at, updated_at FROM users WHERE id = \\? LIMIT 1"
+	query := "SELECT id, full_name, email, hash, is_active, is_trashed, list_view_enabled, dark_mode_enabled, " +
+		"created_at, updated_at FROM users WHERE id = \\? LIMIT 1"
 	mock.ExpectQuery(query).WillReturnRows(rows)
 
 	ur := userRepo.NewSqliteUserRepository(db)
@@ -70,11 +71,9 @@ func TestGetUser(t *testing.T) {
 	assert.NotNil(t, user)
 	assert.Equal(t, num, user.ID)
 	assert.Equal(t, "mrtest@example.com", user.Email)
-
 }
 
 func TestGetUserByEmail(t *testing.T) {
-
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
@@ -84,9 +83,11 @@ func TestGetUserByEmail(t *testing.T) {
 	rows := sqlmock.NewRows([]string{
 		"id", "full_name", "email", "hash", "is_active", "is_trashed", "list_view_enabled", "dark_mode_enabled",
 		"created_at", "updated_at"}).
-		AddRow(1, "Mr. Test", "mrtest@example.com", "skflrrweoiruowiu43", 1, 0, 1, 1, time.Now().UTC(), time.Now().UTC())
+		AddRow(1, "Mr. Test", "mrtest@example.com", "skflrrweoiruowiu43", 1, 0, 1, 1,
+			time.Now().UTC(), time.Now().UTC())
 
-	query := "SELECT id, full_name, email, hash, is_active, is_trashed, list_view_enabled, dark_mode_enabled, created_at, updated_at FROM users WHERE email = \\? LIMIT 1"
+	query := "SELECT id, full_name, email, hash, is_active, is_trashed, list_view_enabled, dark_mode_enabled, " +
+		"created_at, updated_at FROM users WHERE email = \\? LIMIT 1"
 	mock.ExpectQuery(query).WillReturnRows(rows)
 
 	ur := userRepo.NewSqliteUserRepository(db)
@@ -97,7 +98,6 @@ func TestGetUserByEmail(t *testing.T) {
 	assert.NotNil(t, user)
 	assert.Equal(t, email, user.Email)
 	assert.Equal(t, "Mr. Test", user.FullName)
-
 }
 
 func TestUpdateUser(t *testing.T) {
@@ -117,7 +117,8 @@ func TestUpdateUser(t *testing.T) {
 	}
 	defer db.Close()
 
-	query := "UPDATE users SET hash = \\?, is_active = \\?, is_trashed = \\?, list_view_enabled = \\?, dark_mode_enabled = \\?, updated_at = \\? WHERE id = \\?"
+	query := "UPDATE users SET hash = \\?, is_active = \\?, is_trashed = \\?, list_view_enabled = \\?, " +
+		"dark_mode_enabled = \\?, updated_at = \\? WHERE id = \\?"
 	prep := mock.ExpectPrepare(query)
 	prep.ExpectExec().WithArgs(u.Hash, u.IsActive, u.IsTrashed, u.ListViewEnabled, u.DarkModeEnabled, u.UpdatedAt, u.ID).
 		WillReturnResult(sqlmock.NewResult(12, 1))

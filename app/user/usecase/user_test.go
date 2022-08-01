@@ -58,7 +58,7 @@ func TestRegistration(t *testing.T) {
 	})
 }
 
-func TestLogin(t *testing.T) {
+func TestLoginSuccessAndWrongPassword(t *testing.T) {
 	mockUserRepo := new(mocks.UserRepository)
 
 	hash, _ := bcrypt.GenerateFromPassword([]byte("super_password"), bcrypt.MinCost)
@@ -97,9 +97,22 @@ func TestLogin(t *testing.T) {
 		assert.Error(t, err)
 		assert.EqualError(t, err, "email/password is incorrect")
 	})
+}
+
+func TestLoginWrongEmailAndInactive(t *testing.T) {
+	mockUserRepo := new(mocks.UserRepository)
+
+	hash, _ := bcrypt.GenerateFromPassword([]byte("super_password"), bcrypt.MinCost)
+	mockUser := model.User{
+		ID:        1,
+		FullName:  "Mr. Test",
+		Email:     "mrtest@example.com",
+		Hash:      string(hash),
+		IsActive:  1,
+		IsTrashed: 0,
+	}
 
 	t.Run("wrong-email", func(t *testing.T) {
-
 		mockUserRepo.On("GetUserByEmail", mock.Anything, mock.AnythingOfType("string")).
 			Return(model.User{}, errors.New("not found")).Once()
 
@@ -156,7 +169,6 @@ func TestGetUserDetails(t *testing.T) {
 	})
 
 	t.Run("not-found", func(t *testing.T) {
-
 		mockUserRepo.On("GetUser", mock.Anything, mock.AnythingOfType("int32")).
 			Return(model.User{}, errors.New("no row found")).Once()
 
@@ -213,8 +225,21 @@ func TestUpdate(t *testing.T) {
 		assert.Error(t, err)
 		assert.EqualError(t, err, "old password doesn't match")
 		mockUserRepo.AssertExpectations(t)
-
 	})
+}
+
+func TestDelete(t *testing.T) {
+	mockUserRepo := new(mocks.UserRepository)
+
+	hash, _ := bcrypt.GenerateFromPassword([]byte("super_password"), bcrypt.MinCost)
+	mockUser := model.User{
+		ID:        1,
+		FullName:  "Mr. Test",
+		Email:     "mrtest@example.com",
+		Hash:      string(hash),
+		IsActive:  1,
+		IsTrashed: 0,
+	}
 
 	t.Run("delete", func(t *testing.T) {
 		existingUser := mockUser
