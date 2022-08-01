@@ -25,5 +25,7 @@ _doc/swagger.json
 _doc/swagger.yaml
 _doc/docs.go
 config.yml
+!it/config.yml
+!it/**/config.yml
 data
 it/*.db

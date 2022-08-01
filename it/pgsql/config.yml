@@ -1,4 +1,5 @@
 app:
+  env: test
   host:
   port: 8000
   read_timeout: 2s
@@ -8,18 +9,18 @@ app:
   request_body_limit: "5M"
   max_page_size: 50
   default_page_size: 20
-  data_path: ./data # for sqlite | value must be /persist for docker
+  data_path: ./
   registration_open: true
 
 jwt:
   secret_key: "super_secret_key"
-  expire_time: 3600s
+  expire_time: 600s
 
 database:
   type: postgres
   host: localhost
   port: 5432
-  name: librenote
+  name: librenote_test
   username: dev
   password: dev
   ssl_mode: disable
