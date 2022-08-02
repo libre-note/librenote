@@ -14,7 +14,7 @@ export PATH=$(shell go env GOPATH)/bin:$(shell echo $$PATH)
 
 .PHONY: all
 
-all: build test-unit ## Build binary (with unit tests)
+all: dl-deps build test-unit ## Build binary (with unit tests)
 
 help: ## Display this help screen
 	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
@@ -43,14 +43,14 @@ clean: ## Cleans output directory
 	$(shell rm -rf $(BIN_OUT_DIR)/*)
 	$(shell rm -rf ./*.db ./it/*.db coverage.txt _doc/docs.go _doc/swagger.json _doc/swagger.yaml)
 
-build-deps:
+dl-deps: ## Get dependencies
 	go mod vendor
 
-build: clean build-deps ## Build binary
+build: clean ## Build binary
 	go build -v -ldflags="-w -s -X librenote/app.Version=${BUILD_VERSION} -X librenote/app.BuildTime=${BUILD_TIME}" -o $(BIN_OUT_DIR)/$(BINARY_NAME)
 
-run: build ## Build and run binary
-	./$(BIN_OUT_DIR)/$(BINARY_NAME)
+version: ## Check binary version
+	./$(BIN_OUT_DIR)/$(BINARY_NAME) version
 
 serve: build ## Run http server
 	./$(BIN_OUT_DIR)/$(BINARY_NAME) serve
