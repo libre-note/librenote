@@ -1,15 +1,9 @@
 # LibreNote
-<p align="center">
-  <a href="https://golang.org/doc/go1.17">
-    <img src="https://img.shields.io/badge/Go-1.17+-00ADD8?style=flat&logo=go">
-  </a>
-  <a href="https://github.com/libre-note/librenote/actions?query=workflow%3ASecurity">
-    <img src="https://img.shields.io/github/workflow/status/libre-note/librenote/Security?label=%F0%9F%94%91%20gosec&style=flat&color=75C46B">
-  </a>
-  <a href="https://opensource.org/licenses/MIT">
-    <img src="https://img.shields.io/badge/License-MIT-green.svg">
-  </a>
-</p>
+[![](https://img.shields.io/badge/Go-1.17+-00ADD8?style=flat&logo=go)](https://golang.org/doc/go1.17)
+[![build](https://github.com/libre-note/librenote/actions/workflows/build.yml/badge.svg)](https://github.com/libre-note/librenote/actions?query=workflow%3ABuild)
+[![gosec](https://img.shields.io/github/workflow/status/libre-note/librenote/Security?label=%F0%9F%94%91%20gosec&style=flat&color=75C46B)](https://github.com/libre-note/librenote/actions?query=workflow%3ASecurity)
+[![codecov](https://codecov.io/gh/libre-note/librenote/branch/master/graph/badge.svg?token=N3JVSRO5NZ)](https://codecov.io/gh/libre-note/librenote)
+[![Go Report Card](https://goreportcard.com/badge/github.com/libre-note/librenote)](https://goreportcard.com/report/github.com/libre-note/librenote)
 
 Libre(Free as in freedom) note is a note taking applications. A alternative to google keep.
 

@@ -6,15 +6,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func serveCommand() *cobra.Command {
-	return &cobra.Command{
-		Use:   "serve",
-		Short: "Serve serves the librenote api service",
-		Long:  `Serve serves the librenote api service`,
-		Run: func(cmd *cobra.Command, args []string) {
-			serverReady := make(chan bool)
-			s := server.Server{ServerReady: serverReady}
-			s.Serve()
-		},
-	}
+//nolint:gochecknoinits
+func init() {
+	rootCmd.AddCommand(serveCmd)
+}
+
+// nolint:gochecknoglobals
+var serveCmd = &cobra.Command{
+	Use:   "serve",
+	Short: "Serve serves the librenote api service",
+	Long:  `Serve serves the librenote api service`,
+	Run: func(cmd *cobra.Command, args []string) {
+		serverReady := make(chan bool)
+		s := server.Server{ServerReady: serverReady}
+		s.Serve()
+	},
 }

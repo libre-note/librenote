@@ -50,7 +50,7 @@ build: clean ## Build binary
 	go build -v -ldflags="-w -s -X librenote/app.Version=${BUILD_VERSION} -X librenote/app.BuildTime=${BUILD_TIME}" -o $(BIN_OUT_DIR)/$(BINARY_NAME)
 
 version: ## Check binary version
-	./$(BIN_OUT_DIR)/$(BINARY_NAME) version
+	./$(BIN_OUT_DIR)/$(BINARY_NAME) --version
 
 serve: build ## Run http server
 	./$(BIN_OUT_DIR)/$(BINARY_NAME) serve
@@ -60,22 +60,22 @@ doc: ## Creates swagger documentation as html file
 	$(shell go env GOPATH)/bin/swag init -g _doc/api.go -o _doc
 	$(shell which redoc-cli) build --options.disableSearch --options.hideDownloadButton -o _doc/swagger.html _doc/swagger.json
 
-migrate-up-pgsql: build ## Run migration postgresql
+migrate-up-pgsql: ## Run migration postgresql
 	./$(BIN_OUT_DIR)/$(BINARY_NAME) migrate -p ${MIGRATION_PATH_PG} up
 
-migrate-down-pgsql: build ## Revert migration postgresql
+migrate-down-pgsql: ## Revert migration postgresql
 	./$(BIN_OUT_DIR)/$(BINARY_NAME) migrate -p ${MIGRATION_PATH_PG} down
 
-migrate-up-mysql: build ## Run migration mysql
+migrate-up-mysql: ## Run migration mysql
 	./$(BIN_OUT_DIR)/$(BINARY_NAME) migrate -p ${MIGRATION_PATH_MYSQL} up
 
-migrate-down-mysql: build ## Revert migration mysql
+migrate-down-mysql: ## Revert migration mysql
 	./$(BIN_OUT_DIR)/$(BINARY_NAME) migrate -p ${MIGRATION_PATH_MYSQL} down
 
-migrate-up-sqlite: build ## Run migration sqlite
+migrate-up-sqlite: ## Run migration sqlite
 	./$(BIN_OUT_DIR)/$(BINARY_NAME) migrate -p ${MIGRATION_PATH_SQLITE} up
 
-migrate-down-sqlite: build ## Revert migration sqlite
+migrate-down-sqlite: ## Revert migration sqlite
 	./$(BIN_OUT_DIR)/$(BINARY_NAME) migrate -p ${MIGRATION_PATH_SQLITE} down
 
 docker-build: ## Build docker image
