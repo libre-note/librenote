@@ -19,15 +19,13 @@ all: build test-unit ## Build binary (with unit tests)
 help: ## Display this help screen
 	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-setup:
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.44.0
-	go install golang.org/x/tools/cmd/goimports@v0.1.9
-
-lint: setup build ## Run lint checks
+lint: build ## Run lint checks
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 	$(shell go env GOPATH)/bin/golangci-lint run
 
-fmt: setup ## Refactor go files with gofmt and goimports
-	find . -name '*.go' | while read -r file; do gofmt -w -s "$$file"; goimports -w "$$file"; done
+fmt: ## Refactor go files with gofmt and goimports
+	go install golang.org/x/tools/cmd/goimports@latest
+	find . -name '*.go' | while read -r file; do goimports -w "$$file"; done
 
 test-unit:  ## Run unit tests
 	go test -v -coverprofile=coverage.txt -covermode=atomic -cover ./app/...
