@@ -12,7 +12,7 @@ app:
   registration_open: true
 
 jwt:
-  secret_key: "super_secret_key"
+  secret_key: "super_secret_key_super_secret_key" # must be >= 32 characters
   expire_time: 3600s
 
 database:

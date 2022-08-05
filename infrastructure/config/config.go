@@ -97,5 +97,9 @@ func Load(path string) error {
 
 	c.App.DataPath = dataPath
 
+	if len(c.Jwt.SecretKey) < 32 {
+		return fmt.Errorf("jwt secret_key length must be equal or greater than 32 characters")
+	}
+
 	return nil
 }

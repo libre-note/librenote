@@ -38,7 +38,7 @@ func (u *userUsecase) Registration(c context.Context, m *model.User) (err error)
 	}
 
 	// generate password salted hash
-	hash, err := bcrypt.GenerateFromPassword([]byte(m.Hash), bcrypt.MinCost)
+	hash, err := bcrypt.GenerateFromPassword([]byte(m.Hash), bcrypt.DefaultCost)
 	if err != nil {
 		return
 	}
