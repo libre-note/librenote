@@ -1,6 +1,7 @@
 package http
 
 import (
+	"errors"
 	"librenote/app/model"
 	"librenote/app/response"
 	"librenote/app/validation"
@@ -28,6 +29,8 @@ func NewUserHandler(e *echo.Echo, us model.UserUsecase) {
 	me := e.Group("/api/v1/me")
 	_ = middlewares.AttachJwtToGroup(me)
 	me.GET("", handler.Me)
+	me.POST("", handler.UpdateSettings)
+	me.DELETE("", handler.DeleteMe)
 }
 
 func (u *UserHandler) Registration(c echo.Context) error {
@@ -39,12 +42,12 @@ func (u *UserHandler) Registration(c echo.Context) error {
 	}
 
 	if ok, err := validation.Validate(&regReq); !ok {
-		errors, valErr := validation.FormatErrors(err)
+		valErrors, valErr := validation.FormatErrors(err)
 		if valErr != nil {
 			return c.JSON(response.RespondError(response.ErrBadRequest, valErr))
 		}
 
-		return c.JSON(response.RespondValidationError(response.ErrBadRequest, errors))
+		return c.JSON(response.RespondValidationError(response.ErrBadRequest, valErrors))
 	}
 
 	nowTime := time.Now().UTC().Format("2006-01-02 15:04:05")
@@ -76,12 +79,12 @@ func (u *UserHandler) Login(c echo.Context) error {
 	}
 
 	if ok, err := validation.Validate(&lReq); !ok {
-		errors, valErr := validation.FormatErrors(err)
+		valErrors, valErr := validation.FormatErrors(err)
 		if valErr != nil {
 			return c.JSON(response.RespondError(response.ErrBadRequest, valErr))
 		}
 
-		return c.JSON(response.RespondValidationError(response.ErrBadRequest, errors))
+		return c.JSON(response.RespondValidationError(response.ErrBadRequest, valErrors))
 	}
 
 	ctx := c.Request().Context()
@@ -95,15 +98,88 @@ func (u *UserHandler) Login(c echo.Context) error {
 }
 
 func (u *UserHandler) Me(c echo.Context) error {
-	token := c.Get("user").(*jwt.Token)
-	userID := token.Claims.(*middlewares.JwtCustomClaims).UserID
-
 	ctx := c.Request().Context()
 
-	details, err := u.UUseCase.GetUserDetails(ctx, userID)
+	details, err := u.UUseCase.GetUserDetails(ctx, getUserID(c))
 	if err != nil {
 		return c.JSON(response.RespondError(err))
 	}
 
 	return c.JSON(response.RespondSuccess("request success", details))
+}
+
+func getUserID(c echo.Context) int32 {
+	token := c.Get("user").(*jwt.Token)
+	return token.Claims.(*middlewares.JwtCustomClaims).UserID
+}
+
+func (u *UserHandler) UpdateSettings(c echo.Context) error {
+	var usReq updateSettings
+
+	err := c.Bind(&usReq)
+	if err != nil {
+		return c.JSON(response.RespondError(response.ErrUnprocessableEntity, err))
+	}
+
+	if ok, err := validation.Validate(&usReq); !ok {
+		valErrors, valErr := validation.FormatErrors(err)
+		if valErr != nil {
+			return c.JSON(response.RespondError(response.ErrBadRequest, valErr))
+		}
+
+		return c.JSON(response.RespondValidationError(response.ErrBadRequest, valErrors))
+	}
+
+	// validate both password present
+	if (len(usReq.OldPassword) > 0 && len(usReq.NewPassword) == 0) ||
+		(len(usReq.NewPassword) > 0 && len(usReq.OldPassword) == 0) {
+		return c.JSON(response.RespondError(
+			response.ErrBadRequest,
+			errors.New("both old_password & new_password field needed"),
+		))
+	}
+
+	ctx := c.Request().Context()
+
+	user, err := u.UUseCase.GetUser(ctx, getUserID(c))
+	if err != nil {
+		return c.JSON(response.RespondError(err))
+	}
+
+	passwordM := model.Password{
+		OldPassword: usReq.OldPassword,
+		NewPassword: usReq.NewPassword,
+	}
+
+	if len(usReq.OldPassword) > 0 && len(usReq.NewPassword) > 0 {
+		passwordM.IsChanged = true
+	}
+
+	user.ListViewEnabled = *usReq.ListViewEnabled
+	user.DarkModeEnabled = *usReq.DarkModeEnabled
+
+	err = u.UUseCase.Update(ctx, user, passwordM)
+	if err != nil {
+		return c.JSON(response.RespondError(err))
+	}
+
+	return c.JSON(response.RespondSuccess("updated successfully", nil))
+}
+
+func (u *UserHandler) DeleteMe(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	user, err := u.UUseCase.GetUser(ctx, getUserID(c))
+	if err != nil {
+		return c.JSON(response.RespondError(err))
+	}
+
+	user.IsTrashed = 1
+
+	err = u.UUseCase.Update(ctx, user, model.Password{})
+	if err != nil {
+		return c.JSON(response.RespondError(err))
+	}
+
+	return c.JSON(response.RespondEmpty())
 }

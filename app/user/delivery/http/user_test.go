@@ -15,6 +15,8 @@ import (
 	"testing"
 	"time"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -33,6 +35,13 @@ type registrationReq struct {
 type loginReq struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+type updateSettings struct {
+	OldPassword     string `json:"old_password"`
+	NewPassword     string `json:"new_password"`
+	ListViewEnabled int8   `json:"list_view_enabled"`
+	DarkModeEnabled int8   `json:"dark_mode_enabled"`
 }
 
 func TestRegistration(t *testing.T) {
@@ -137,8 +146,19 @@ func buildEchoPostRequest(t *testing.T, path string, payload io.Reader) (echo.Co
 	return c, rec
 }
 
-func buildEchoAuthorizedRequest(t *testing.T, method, path, token string) (echo.Context, *httptest.ResponseRecorder) {
-	req, err := http.NewRequest(method, path, nil)
+func buildEchoAuthorizedRequest(t *testing.T, method, path, token string, payload io.Reader) (
+	echo.Context, *httptest.ResponseRecorder) {
+	var req *http.Request
+
+	var err error
+
+	if payload != nil {
+		req, err = http.NewRequest(method, path, payload)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	} else {
+		req, err = http.NewRequest(method, path, nil)
+	}
+
 	assert.NoError(t, err)
 
 	req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
@@ -150,6 +170,7 @@ func buildEchoAuthorizedRequest(t *testing.T, method, path, token string) (echo.
 	return ctx, res
 }
 
+// nolint:unparam
 func getToken(userID int32) string {
 	jwtCfg := config.Get().Jwt
 	claims := &middlewares.JwtCustomClaims{
@@ -190,7 +211,7 @@ func TestMe(t *testing.T) {
 	}
 
 	t.Run("success", func(t *testing.T) {
-		ctx, res := buildEchoAuthorizedRequest(t, echo.GET, endPoint, getToken(1))
+		ctx, res := buildEchoAuthorizedRequest(t, echo.GET, endPoint, getToken(1), nil)
 		handle := attachJWTMiddleware(handler.Me)
 
 		assert.NoError(t, handle(ctx))
@@ -207,10 +228,151 @@ func TestMe(t *testing.T) {
 	})
 
 	t.Run("invalid token", func(t *testing.T) {
-		ctx, _ := buildEchoAuthorizedRequest(t, echo.GET, endPoint, "invalid_token")
+		ctx, _ := buildEchoAuthorizedRequest(t, echo.GET, endPoint, "invalid_token", nil)
 		handle := attachJWTMiddleware(handler.Me)
 
 		assert.Error(t, handle(ctx))
+		mockUsecase.AssertExpectations(t)
+	})
+}
+
+// nolint:funlen
+func TestUpdateSettings(t *testing.T) {
+	endPoint := BaseURLV1 + "/me"
+
+	hash, err := bcrypt.GenerateFromPassword([]byte("12345678"), bcrypt.DefaultCost)
+	assert.NoError(t, err)
+
+	requestBody := updateSettings{
+		OldPassword:     "",
+		NewPassword:     "",
+		ListViewEnabled: 0,
+		DarkModeEnabled: 1,
+	}
+	mockUser := model.User{
+		ID:              1,
+		FullName:        "Mr. Test",
+		Email:           "mrtest@example.com",
+		Hash:            string(hash),
+		IsActive:        1,
+		IsTrashed:       0,
+		ListViewEnabled: 0,
+		DarkModeEnabled: 1,
+	}
+
+	mockUsecase := new(mocks.UserUsecase)
+	mockUsecase.On("GetUser", mock.Anything, mock.AnythingOfType("int32")).Return(&mockUser, nil)
+	mockUsecase.On("Update", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+	handler := userHttp.UserHandler{
+		UUseCase: mockUsecase,
+	}
+
+	t.Run("update-settings", func(t *testing.T) {
+		tempReq := requestBody
+
+		j, err := json.Marshal(tempReq)
+		assert.NoError(t, err)
+		ctx, res := buildEchoAuthorizedRequest(t, echo.POST, endPoint, getToken(1), strings.NewReader(string(j)))
+		handle := attachJWTMiddleware(handler.UpdateSettings)
+
+		assert.NoError(t, handle(ctx))
+		assert.Equal(t, http.StatusOK, res.Code)
+
+		var r response.Response
+		assert.NoError(t, json.Unmarshal(res.Body.Bytes(), &r))
+		assert.True(t, true, r.Success)
+
+		assert.Equal(t, "updated successfully", r.Message)
+
+		mockUsecase.AssertExpectations(t)
+	})
+
+	t.Run("update-password", func(t *testing.T) {
+		tempReq := requestBody
+		tempReq.OldPassword = "12345678"
+		tempReq.NewPassword = "foobar-test"
+
+		j, err := json.Marshal(tempReq)
+		assert.NoError(t, err)
+		ctx, res := buildEchoAuthorizedRequest(t, echo.POST, endPoint, getToken(1), strings.NewReader(string(j)))
+		handle := attachJWTMiddleware(handler.UpdateSettings)
+
+		assert.NoError(t, handle(ctx))
+		assert.Equal(t, http.StatusOK, res.Code)
+
+		var r response.Response
+		assert.NoError(t, json.Unmarshal(res.Body.Bytes(), &r))
+		assert.True(t, true, r.Success)
+
+		assert.Equal(t, "updated successfully", r.Message)
+
+		mockUsecase.AssertExpectations(t)
+	})
+
+	t.Run("field-required", func(t *testing.T) {
+		tempReq := requestBody
+		tempReq.OldPassword = "12345678"
+
+		j, err := json.Marshal(tempReq)
+		assert.NoError(t, err)
+		ctx, res := buildEchoAuthorizedRequest(t, echo.POST, endPoint, getToken(1), strings.NewReader(string(j)))
+		handle := attachJWTMiddleware(handler.UpdateSettings)
+
+		assert.NoError(t, handle(ctx))
+		assert.Equal(t, http.StatusBadRequest, res.Code)
+
+		mockUsecase.AssertExpectations(t)
+	})
+
+	t.Run("field-required-2", func(t *testing.T) {
+		tempReq := requestBody
+		tempReq.NewPassword = "12345678"
+
+		j, err := json.Marshal(tempReq)
+		assert.NoError(t, err)
+		ctx, res := buildEchoAuthorizedRequest(t, echo.POST, endPoint, getToken(1), strings.NewReader(string(j)))
+		handle := attachJWTMiddleware(handler.UpdateSettings)
+
+		assert.NoError(t, handle(ctx))
+		assert.Equal(t, http.StatusBadRequest, res.Code)
+
+		mockUsecase.AssertExpectations(t)
+	})
+}
+
+func TestDeleteMe(t *testing.T) {
+	endPoint := BaseURLV1 + "/me"
+
+	hash, err := bcrypt.GenerateFromPassword([]byte("super_password"), bcrypt.DefaultCost)
+	assert.NoError(t, err)
+
+	mockUser := model.User{
+		ID:              1,
+		FullName:        "Mr. Test",
+		Email:           "mrtest@example.com",
+		Hash:            string(hash),
+		IsActive:        1,
+		IsTrashed:       0,
+		ListViewEnabled: 0,
+		DarkModeEnabled: 1,
+	}
+
+	mockUsecase := new(mocks.UserUsecase)
+	mockUsecase.On("GetUser", mock.Anything, mock.AnythingOfType("int32")).Return(&mockUser, nil)
+	mockUsecase.On("Update", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+	handler := userHttp.UserHandler{
+		UUseCase: mockUsecase,
+	}
+
+	t.Run("delete-account", func(t *testing.T) {
+		ctx, res := buildEchoAuthorizedRequest(t, echo.DELETE, endPoint, getToken(1), nil)
+		handle := attachJWTMiddleware(handler.DeleteMe)
+
+		assert.NoError(t, handle(ctx))
+		assert.Equal(t, http.StatusNoContent, res.Code)
+
 		mockUsecase.AssertExpectations(t)
 	})
 }

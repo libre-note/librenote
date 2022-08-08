@@ -45,5 +45,6 @@ type UserUsecase interface {
 	Registration(c context.Context, m *User) (err error)
 	Login(c context.Context, email, password string) (token string, err error)
 	GetUserDetails(c context.Context, id int32) (user *UserDetails, err error)
+	GetUser(c context.Context, id int32) (user *User, err error)
 	Update(c context.Context, m *User, p Password) error
 }

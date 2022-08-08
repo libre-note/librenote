@@ -33,6 +33,8 @@ type e2eTestSuite struct {
 	apiBaseURL  string
 }
 
+const loginJSON = `{"email": "mrtest3@example.com", "password":"12345678"}`
+
 func TestE2ETestSuite(t *testing.T) {
 	suite.Run(t, &e2eTestSuite{})
 }
@@ -188,4 +190,89 @@ func (s *e2eTestSuite) Test_EndToEnd_Me() {
 
 	resultsMap := r.Results.(map[string]interface{})
 	s.Equal("mrtest3@example.com", resultsMap["email"])
+}
+
+func (s *e2eTestSuite) Test_EndToEnd_UpdateSettings() {
+	s.createUser(5)
+
+	reqStr := `{"email": "mrtest3@example.com", "password":"12345678"}`
+	token := s.doLogin(reqStr)
+
+	reqStr = `{"list_view_enabled":1, "dark_mode_enabled":0}`
+	req, err := http.NewRequest(echo.POST, s.apiBaseURL+"/me", strings.NewReader(reqStr))
+	s.NoError(err)
+
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
+
+	client := http.Client{}
+	res, err := client.Do(req)
+	s.NoError(err)
+
+	s.Equal(http.StatusOK, res.StatusCode)
+
+	byteBody, err := io.ReadAll(res.Body)
+
+	s.NoError(err)
+
+	_ = res.Body.Close()
+
+	var r response.Response
+
+	s.NoError(json.Unmarshal(byteBody, &r))
+
+	s.True(true, r.Success)
+	s.Equal("updated successfully", r.Message)
+}
+
+func (s *e2eTestSuite) Test_EndToEnd_UpdatePassword() {
+	s.createUser(5)
+
+	token := s.doLogin(loginJSON)
+
+	reqStr := `{"old_password":"12345678", "new_password":"super_passwrod_updated", "list_view_enabled":1,
+"dark_mode_enabled":0}`
+	req, err := http.NewRequest(echo.POST, s.apiBaseURL+"/me", strings.NewReader(reqStr))
+	s.NoError(err)
+
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
+
+	client := http.Client{}
+	res, err := client.Do(req)
+	s.NoError(err)
+
+	s.Equal(http.StatusOK, res.StatusCode)
+
+	byteBody, err := io.ReadAll(res.Body)
+
+	s.NoError(err)
+
+	_ = res.Body.Close()
+
+	var r response.Response
+
+	s.NoError(json.Unmarshal(byteBody, &r))
+
+	s.True(true, r.Success)
+	s.Equal("updated successfully", r.Message)
+}
+
+func (s *e2eTestSuite) Test_EndToEnd_DeleteAccount() {
+	s.createUser(3)
+
+	token := s.doLogin(loginJSON)
+
+	req, err := http.NewRequest(echo.DELETE, s.apiBaseURL+"/me", nil)
+	s.NoError(err)
+
+	req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
+
+	client := http.Client{}
+	res, err := client.Do(req)
+	s.NoError(err)
+
+	_ = res.Body.Close()
+
+	s.Equal(http.StatusNoContent, res.StatusCode)
 }

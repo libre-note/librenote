@@ -180,6 +180,52 @@ func TestGetUserDetails(t *testing.T) {
 	})
 }
 
+func TestGetUser(t *testing.T) {
+	mockUserRepo := new(mocks.UserRepository)
+
+	hash, _ := bcrypt.GenerateFromPassword([]byte("super_password"), bcrypt.MinCost)
+	mockUser := model.User{
+		ID:              1,
+		FullName:        "Mr. Test",
+		Email:           "mrtest@example.com",
+		Hash:            string(hash),
+		IsActive:        1,
+		IsTrashed:       0,
+		ListViewEnabled: 1,
+		DarkModeEnabled: 1,
+	}
+
+	t.Run("success", func(t *testing.T) {
+		existingUser := mockUser
+
+		mockUserRepo.On("GetUser", mock.Anything, mock.AnythingOfType("int32")).
+			Return(existingUser, nil).Once()
+
+		u := usecase.NewUserUsecase(mockUserRepo, time.Second*2)
+		user, err := u.GetUser(context.TODO(), 1)
+
+		assert.NoError(t, err)
+		assert.Equal(t, existingUser.Email, user.Email)
+		assert.Equal(t, existingUser.ListViewEnabled, user.ListViewEnabled)
+		mockUserRepo.AssertExpectations(t)
+	})
+
+	t.Run("deleted", func(t *testing.T) {
+		existingUser := mockUser
+		existingUser.IsTrashed = 1
+
+		mockUserRepo.On("GetUser", mock.Anything, mock.AnythingOfType("int32")).
+			Return(existingUser, nil).Once()
+
+		u := usecase.NewUserUsecase(mockUserRepo, time.Second*2)
+		_, err := u.GetUser(context.TODO(), 2)
+
+		assert.Error(t, err)
+		assert.EqualError(t, err, "user not exist or inactive")
+		mockUserRepo.AssertExpectations(t)
+	})
+}
+
 func TestUpdate(t *testing.T) {
 	mockUserRepo := new(mocks.UserRepository)
 

@@ -22,10 +22,15 @@ func RespondSuccess(msg string, results interface{}) (int, Response) {
 		Results: results,
 	}
 }
+
 func RespondLoginSuccess(token string) (int, Response) {
 	return http.StatusOK, Response{
 		Success: true,
 		Message: "Login successful",
 		Token:   token,
 	}
+}
+
+func RespondEmpty() (int, string) {
+	return http.StatusNoContent, ""
 }

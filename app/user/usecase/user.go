@@ -112,6 +112,11 @@ func (u *userUsecase) GetUserDetails(c context.Context, id int32) (details *mode
 		return nil, err
 	}
 
+	// check user state
+	if user.IsActive == 0 || user.IsTrashed == 1 {
+		return nil, response.WrapError(errors.New("user not exist or inactive"), http.StatusUnauthorized)
+	}
+
 	details = &model.UserDetails{
 		FullName:        user.FullName,
 		Email:           user.Email,
@@ -122,6 +127,27 @@ func (u *userUsecase) GetUserDetails(c context.Context, id int32) (details *mode
 	return details, nil
 }
 
+func (u *userUsecase) GetUser(c context.Context, id int32) (*model.User, error) {
+	ctx, cancel := context.WithTimeout(c, u.contextTimeout)
+	defer cancel()
+
+	user, err := u.repo.GetUser(ctx, id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return &user, response.ErrNotFound
+		}
+
+		return &user, err
+	}
+
+	// check user state
+	if user.IsActive == 0 || user.IsTrashed == 1 {
+		return &user, response.WrapError(errors.New("user not exist or inactive"), http.StatusUnauthorized)
+	}
+
+	return &user, nil
+}
+
 func (u *userUsecase) Update(c context.Context, m *model.User, p model.Password) error {
 	ctx, cancel := context.WithTimeout(c, u.contextTimeout)
 	defer cancel()
@@ -130,11 +156,11 @@ func (u *userUsecase) Update(c context.Context, m *model.User, p model.Password)
 		// check old password is correct
 		err := bcrypt.CompareHashAndPassword([]byte(m.Hash), []byte(p.OldPassword))
 		if err != nil {
-			return errors.New("old password doesn't match")
+			return response.WrapError(errors.New("old password doesn't match"), http.StatusBadRequest)
 		}
 
 		// generate password salted hash
-		hash, err := bcrypt.GenerateFromPassword([]byte(p.NewPassword), bcrypt.MinCost)
+		hash, err := bcrypt.GenerateFromPassword([]byte(p.NewPassword), bcrypt.DefaultCost)
 		if err != nil {
 			return err
 		}
