@@ -60,6 +60,11 @@ func Get() Config {
 	return c
 }
 
+// SetRegistrationOn make registration open
+func SetRegistrationOn() {
+	c.App.RegistrationOpen = true
+}
+
 // Load the config
 func Load(path string) error {
 	viper.SetConfigType("yaml")

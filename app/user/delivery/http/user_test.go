@@ -45,6 +45,8 @@ type updateSettings struct {
 }
 
 func TestRegistration(t *testing.T) {
+	config.SetRegistrationOn()
+
 	mockUsecase := new(mocks.UserUsecase)
 	mockUsecase.On("Registration", mock.Anything, mock.AnythingOfType("*model.User")).Return(nil)
 

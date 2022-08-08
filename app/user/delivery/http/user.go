@@ -5,6 +5,7 @@ import (
 	"librenote/app/model"
 	"librenote/app/response"
 	"librenote/app/validation"
+	"librenote/infrastructure/config"
 	"librenote/infrastructure/middlewares"
 	"time"
 
@@ -34,6 +35,10 @@ func NewUserHandler(e *echo.Echo, us model.UserUsecase) {
 }
 
 func (u *UserHandler) Registration(c echo.Context) error {
+	if !config.Get().App.RegistrationOpen {
+		return c.JSON(response.RespondError(response.ErrBadRequest, errors.New("registration closed")))
+	}
+
 	var regReq registrationReq
 
 	err := c.Bind(&regReq)
