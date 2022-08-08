@@ -58,7 +58,7 @@ serve: build ## Run http server
 doc: ## Creates swagger documentation as html file
 	go install github.com/swaggo/swag/cmd/swag@v1.8.4
 	$(shell go env GOPATH)/bin/swag init -g _doc/api.go -o _doc
-	$(shell which redoc-cli) build --options.disableSearch --options.hideDownloadButton -o _doc/swagger.html _doc/swagger.json
+	$(shell which redoc-cli) build --options.disableSearch -o _doc/swagger.html _doc/swagger.json
 
 migrate-up-pgsql: ## Run migration postgresql
 	./$(BIN_OUT_DIR)/$(BINARY_NAME) migrate -p ${MIGRATION_PATH_PG} up

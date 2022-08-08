@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"librenote/app/model"
 	"librenote/app/response"
 	"librenote/app/server"
@@ -98,7 +98,7 @@ func (s *e2eTestSuite) Test_EndToEnd_RegisterUser() {
 	s.NoError(err)
 	s.Equal(http.StatusOK, res.StatusCode)
 
-	byteBody, err := ioutil.ReadAll(res.Body)
+	byteBody, err := io.ReadAll(res.Body)
 	s.NoError(err)
 
 	s.Equal(`{"success":true,"message":"registration successful"}`, strings.Trim(string(byteBody), "\n"))
@@ -125,7 +125,7 @@ func (s *e2eTestSuite) doLogin(payload string) string {
 
 	s.Equal(http.StatusOK, res.StatusCode)
 
-	byteBody, err := ioutil.ReadAll(res.Body)
+	byteBody, err := io.ReadAll(res.Body)
 	s.NoError(err)
 
 	_ = res.Body.Close()
@@ -181,7 +181,7 @@ func (s *e2eTestSuite) Test_EndToEnd_Me() {
 
 	s.Equal(http.StatusOK, res.StatusCode)
 
-	byteBody, err := ioutil.ReadAll(res.Body)
+	byteBody, err := io.ReadAll(res.Body)
 
 	s.NoError(err)
 

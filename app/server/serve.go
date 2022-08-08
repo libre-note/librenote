@@ -51,7 +51,7 @@ func (s *Server) Serve() {
 	}()
 
 	// server is ready now, so close the channel
-	close(s.ServerReady)
+	s.ServerReady <- true
 
 	// signal channel to capture system calls
 	sigCh := make(chan os.Signal, 1)
