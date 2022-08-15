@@ -1,19 +1,19 @@
 name: Build
-on: [push]
+on:
+  push:
+    branches: [ 'master' ]
+    paths-ignore: [ '_deploy/**', '_doc/**' ]
 jobs:
   Build:
     runs-on: ubuntu-latest
     env:
       GO111MODULE: on
-    strategy:
-      matrix:
-        go-version: [ '1.17.x', '1.18.x' ]
     steps:
       - uses: actions/checkout@v3
-      - name: Setup Go ${{ matrix.go-version }}
+      - name: Setup Go
         uses: actions/setup-go@v3
         with:
-          go-version: ${{ matrix.go-version }}
+          go-version: 1.19
       - name: Get dependencies
         run: make dl-deps
       - name: Build binary
