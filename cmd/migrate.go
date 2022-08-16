@@ -2,18 +2,20 @@ package cmd
 
 import (
 	"database/sql"
+	"embed"
 	"errors"
 	"fmt"
 	"librenote/infrastructure/config"
 	"os"
 	"strconv"
 
+	"github.com/golang-migrate/migrate/v4/source/iofs"
+
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database"
 	"github.com/golang-migrate/migrate/v4/database/mysql"
 	"github.com/golang-migrate/migrate/v4/database/pgx"
 	"github.com/golang-migrate/migrate/v4/database/sqlite3"
-	"github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -23,10 +25,14 @@ const (
 	DBMysql = "mysql"
 )
 
+//go:generate cp -r ./../infrastructure/db/migrations ./migrations
+//go:embed migrations/*
+var migrationsFS embed.FS
+
 // nolint:gochecknoglobals
 var (
-	schemaPath string
-	migrateCmd = &cobra.Command{
+	migrationDirMap = map[string]string{"sqlite": "sqlite", "mysql": "mysql", "postgres": "pgsql"}
+	migrateCmd      = &cobra.Command{
 		Use:              "migrate",
 		Short:            "migrate database",
 		Long:             `migrate database like(postgres, mysql, sqlite)`,
@@ -37,9 +43,6 @@ var (
 //nolint:gochecknoinits
 func init() {
 	rootCmd.AddCommand(migrateCmd)
-
-	migrateCmd.PersistentFlags().StringVarP(&schemaPath, "path", "p", "", "migration file path")
-	_ = migrateCmd.MarkPersistentFlagRequired("path")
 
 	// add subcommands
 	migrateCmd.AddCommand(&cobra.Command{
@@ -95,12 +98,14 @@ func migrateDatabase(state string, step int) error {
 		return err
 	}
 
-	fSrc, err := (&file.File{}).Open(schemaPath)
+	schemaPath := fmt.Sprintf("migrations/%s", migrationDirMap[config.Get().Database.Type])
+
+	sDriver, err := iofs.New(migrationsFS, schemaPath)
 	if err != nil {
 		return err
 	}
 
-	m, err := migrate.NewWithInstance("file", fSrc, driverName, instance)
+	m, err := migrate.NewWithInstance("iofs", sDriver, driverName, instance)
 	if err != nil {
 		return err
 	}

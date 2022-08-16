@@ -29,3 +29,4 @@ config.yml
 !it/**/config.yml
 data
 it/*.db
+cmd/migrations

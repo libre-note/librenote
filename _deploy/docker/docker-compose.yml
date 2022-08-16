@@ -8,8 +8,6 @@ services:
     volumes:
       - ${PWD}/config.yml:/app/config.yml
       - ${PWD}/data:/persist # only for sqlite
-      # Only for first time db migrations
-      - ${PWD}/infrastructure/db/migrations/sqlite:/app/migrations # sqlite | mysql | postgres
     ports:
       - "8000:8000"
     environment:

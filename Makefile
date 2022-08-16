@@ -6,10 +6,6 @@ DOCKER_IMAGE_NAME="hrshadhin/librenote"
 BINARY_NAME=librenote
 BIN_OUT_DIR=bin
 
-MIGRATION_PATH_PG="infrastructure/db/migrations/pgsql"
-MIGRATION_PATH_MYSQL="infrastructure/db/migrations/mysql"
-MIGRATION_PATH_SQLITE="infrastructure/db/migrations/sqlite"
-
 export PATH=$(shell go env GOPATH)/bin:$(shell echo $$PATH)
 
 .PHONY: all
@@ -41,12 +37,14 @@ test-integration-pgsql:  ## Run pgsql integration tests
 
 clean: ## Cleans output directory
 	$(shell rm -rf $(BIN_OUT_DIR)/*)
+	$(shell rm -rf cmd/migrations)
 	$(shell rm -rf ./*.db ./it/*.db coverage.txt _doc/docs.go _doc/swagger.json _doc/swagger.yaml)
 
 dl-deps: ## Get dependencies
 	go mod vendor
 
 build: clean ## Build binary
+	go generate ./cmd
 	go build -v -ldflags="-w -s -X librenote/app.Version=${BUILD_VERSION} -X librenote/app.BuildTime=${BUILD_TIME}" -o $(BIN_OUT_DIR)/$(BINARY_NAME)
 
 version: ## Check binary version
@@ -60,23 +58,11 @@ doc: ## Creates swagger documentation as html file
 	$(shell go env GOPATH)/bin/swag init -g _doc/api.go -o _doc
 	$(shell which redoc-cli) build --options.disableSearch -o _doc/swagger.html _doc/swagger.json
 
-migrate-up-pgsql: ## Run migration postgresql
-	./$(BIN_OUT_DIR)/$(BINARY_NAME) migrate -p ${MIGRATION_PATH_PG} up
+migrate-up: ## Run migration
+	./$(BIN_OUT_DIR)/$(BINARY_NAME) migrate up
 
-migrate-down-pgsql: ## Revert migration postgresql
-	./$(BIN_OUT_DIR)/$(BINARY_NAME) migrate -p ${MIGRATION_PATH_PG} down
-
-migrate-up-mysql: ## Run migration mysql
-	./$(BIN_OUT_DIR)/$(BINARY_NAME) migrate -p ${MIGRATION_PATH_MYSQL} up
-
-migrate-down-mysql: ## Revert migration mysql
-	./$(BIN_OUT_DIR)/$(BINARY_NAME) migrate -p ${MIGRATION_PATH_MYSQL} down
-
-migrate-up-sqlite: ## Run migration sqlite
-	./$(BIN_OUT_DIR)/$(BINARY_NAME) migrate -p ${MIGRATION_PATH_SQLITE} up
-
-migrate-down-sqlite: ## Revert migration sqlite
-	./$(BIN_OUT_DIR)/$(BINARY_NAME) migrate -p ${MIGRATION_PATH_SQLITE} down
+migrate-down: ## Revert migration
+	./$(BIN_OUT_DIR)/$(BINARY_NAME) migrate down
 
 docker-build: ## Build docker image
 	docker build --build-arg BUILD_VERSION=${BUILD_VERSION} --build-arg BUILD_TIME=${BUILD_TIME} --tag ${DOCKER_IMAGE_NAME} .
@@ -89,9 +75,8 @@ docker-run: ## Run docker image with sqlite
 	sudo chown -R 1000:1000 data
 	docker run --name librenote_server --rm -it -p 8000:8000 \
 		-v $$(pwd)/config.yml:/app/config.yml \
-		-v $$(pwd)/infrastructure/db/migrations/sqlite:/app/migrations \
 		-v $$(pwd)/data:/persist \
 		$(DOCKER_IMAGE_NAME):latest
 
 docker-migrate: ## Run migrations inside dorker
-	docker exec librenote_server /app/librenote migrate -p /app/migrations up
+	docker exec librenote_server /app/librenote migrate up

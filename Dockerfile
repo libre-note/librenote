@@ -18,7 +18,7 @@ ADD . .
 # Build the Go app
 ARG BUILD_VERSION=0.0.1
 ARG BUILD_TIME=00000000-000000
-RUN GOOS=linux GOARCH=amd64 go build -ldflags "-w -s -X librenote/app.Version=$BUILD_VERSION -X librenote/app.BuildTime=$BUILD_TIME" -o librenote .
+RUN go generate ./cmd && GOOS=linux GOARCH=amd64 go build -ldflags "-w -s -X librenote/app.Version=$BUILD_VERSION -X librenote/app.BuildTime=$BUILD_TIME" -o librenote .
 
 # Minimal image for running the application
 FROM alpine as final
